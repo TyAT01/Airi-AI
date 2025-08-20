@@ -1,0 +1,144 @@
+### **Project AIRI: The Dummy-Proof Installation Guide**
+
+Welcome! This guide will walk you through setting up your very own AI companion, AIRI, on your computer. We'll be using only free, open-source tools to make sure everything can run locally on your machine without costing you anything.
+
+Don't worry if you're new to this—just follow the steps one by one!
+
+#### **Goal:**
+*   Run AIRI on your external SSD.
+*   Use a local AI for the brain (no internet needed for AI).
+*   Use local voice generation (no internet needed for voice).
+*   Keep everything 100% free.
+
+---
+
+### **Part 1: Installing the Prerequisites**
+
+Before we can use AIRI, we need to install a few essential tools.
+
+**1. Install Git (for code)**
+*   **What it is:** A tool for downloading code from GitHub.
+*   **How to install:** Go to the [official Git website](https://git-scm.com/downloads), download the installer for your operating system (Windows, Mac, or Linux), and run it. The default settings are fine.
+
+**2. Install Node.js and pnpm (for the user interface)**
+*   **What they are:** Node.js is a runtime for JavaScript, and pnpm is a tool to manage project dependencies.
+*   **How to install:**
+    1.  Go to the [official Node.js website](https://nodejs.org/en/download/current) and download the installer for your system. Version 23+ is recommended.
+    2.  Run the installer with the default options.
+    3.  Once installed, open your terminal (Command Prompt, PowerShell, or Terminal on Mac/Linux) and type the following command to enable `corepack`, which manages pnpm:
+        ```bash
+        corepack enable
+        ```
+    4.  Now, install `pnpm` by typing:
+        ```bash
+        corepack prepare pnpm@latest --activate
+        ```
+
+**3. Install Rust (for the desktop app)**
+*   **What it is:** The programming language AIRI's desktop application is built with.
+*   **How to install:**
+    *   **Windows:** Open PowerShell and run:
+        ```powershell
+        winget install --id Rustlang.Rustup
+        ```
+        After it finishes, run `rustup-init` and press `1` to proceed with the default installation.
+    *   **Mac/Linux:** Open your terminal and run:
+        ```bash
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        ```
+        When prompted, press `1` to proceed with the default installation.
+
+**4. Install Docker Desktop (for the voice)**
+*   **What it is:** A tool that lets us run applications in a self-contained "box" called a container. This is the easiest way to run our local Text-to-Speech engine.
+*   **How to install:** Go to the [official Docker website](https://www.docker.com/products/docker-desktop/), download the installer for your system, and run it. **Make sure Docker Desktop is running before you proceed to the next parts.**
+
+**5. Install Ollama (for the AI "Brain")**
+*   **What it is:** An amazing tool that lets you easily run powerful language models (like Llama 3) on your own computer.
+*   **How to install:** Go to the [official Ollama website](https://ollama.com/) and click the download button for your operating system. Run the installer.
+
+---
+
+### **Part 2: Setting Up the Local AI and Voice**
+
+Now that the tools are ready, let's get our local AI and voice servers running.
+
+**1. Download Your Local AI Model**
+*   Open your terminal.
+*   Type the following command to download the **Llama 3.1 8B** model. This is a powerful and well-rounded model from Meta. This download will be several gigabytes, so it may take some time.
+    ```bash
+    ollama pull llama3.1:8b-instruct-q5_K_M
+    ```
+*   *(Optional)* If you have an older computer, you can download a smaller model like **Phi-3 Medium**:
+    ```bash
+    ollama pull phi3:medium-128k-instruct-q5_K_M
+    ```
+*   Ollama will now run in the background automatically. You're all set for the AI!
+
+**2. Start Your Local Voice Server**
+*   Make sure Docker Desktop is running.
+*   Open your terminal.
+*   Copy and paste the following command and press Enter. This will download and run a pre-built Text-to-Speech server called Kokoro-FastAPI.
+    ```bash
+    docker run --rm -it -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    ```
+*   You will see a lot of text in the terminal as it starts up. As long as you don't see any major errors, you can just leave this terminal window open. Your voice server is now running!
+
+---
+
+### **Part 3: Installing and Running AIRI**
+
+It's time to get the main AIRI application.
+
+**1. Navigate to Your External SSD**
+*   Open your terminal.
+*   Navigate to your external SSD. For example, if your SSD is the `D:` drive on Windows, you would type `D:`. On a Mac, it might be something like `cd /Volumes/MySSD`.
+
+**2. Download (Clone) Project AIRI**
+*   In the terminal, run the following command to download the AIRI project files into a new folder called `airi`:
+    ```bash
+    git clone https://github.com/moeru-ai/airi.git
+    ```
+
+**3. Enter the Project Directory**
+*   Once it's done, navigate into the new folder:
+    ```bash
+    cd airi
+    ```
+
+**4. Install AIRI's Dependencies**
+*   Now, run the command to install all of AIRI's own dependencies. This can take several minutes.
+    ```bash
+    pnpm install
+    ```
+
+**5. Launch the AIRI Desktop App!**
+*   This is the final step! Run the following command to build and launch the AIRI desktop application:
+    ```bash
+    pnpm dev:tamagotchi
+    ```
+*   The first time you run this, it will take a while to compile everything. A new window for the AIRI app should appear on your screen when it's ready.
+
+---
+
+### **Part 4: Configuring AIRI**
+
+You're almost there! The app is running, but we need to tell it to use our local AI and voice servers.
+
+1.  When the AIRI app launches, you will likely see an onboarding or settings screen. Navigate to the **Settings** area.
+2.  **Configure the LLM Provider:**
+    *   Go to the **Providers** -> **Ollama** section.
+    *   Ensure the settings are pointed to the default local address, which is usually `http://localhost:11434`.
+    *   Select the model you downloaded (e.g., `llama3.1:8b-instruct-q5_K_M`).
+3.  **Configure the Hearing (STT) Provider:**
+    *   Go to the **Modules** -> **Hearing** section.
+    *   Look for an option for **Speech-to-Text**. Select the **Whisper (Local)** or similarly named option. The app should handle downloading the required Whisper model automatically.
+4.  **Configure the Speech (TTS) Provider:**
+    *   Go to the **Providers** -> **OpenAI (Audio Speech)** section. (Yes, we use this setting even though we aren't using OpenAI!).
+    *   In the **Base URL** or **API Endpoint** field, enter the address of your local Kokoro voice server:
+        ```
+        http://localhost:8880/v1
+        ```
+    *   For the **API Key**, you can type anything. It doesn't matter. For example: `12345`.
+    *   Save the settings.
+
+You are now fully configured! You can start chatting with your own locally-run AI companion. Enjoy!
