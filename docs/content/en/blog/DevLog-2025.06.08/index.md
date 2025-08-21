@@ -9,9 +9,9 @@ preview-cover:
   dark: "@assets('./assets/250608-dark.avif')"
 ---
 
-Hello everyone, here's LemonNeko, one of maintainer of AIRI. Today's DevLog is talking about: Let Live2D model of AIRI Tamagotchi to focus position.
+Hello everyone, here's LemonNeko, the founder of AIRI. Today's DevLog is talking about: Let Live2D model of AIRI Tamagotchi to focus position.
 
-大家好，我是 LemonNeko，AIRI 的维护者之一，由我来为大家带来今天的 DevLog：让 AIRI 桌宠的 Live2D 模型可以注视鼠标位置。
+大家好，我是 LemonNeko，AIRI 的创始人，由我来为大家带来今天的 DevLog：让 AIRI 桌宠的 Live2D 模型可以注视鼠标位置。
 
 ## 思路整理「Chain of Thoughts」
 

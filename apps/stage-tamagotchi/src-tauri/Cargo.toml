@@ -2,7 +2,7 @@
 name = "app"
 version.workspace = true
 description = "AIRI tamagotchi app built with Tauri"
-authors = [ "LemonNekoGH <self@lemonneko.moe>" ]
+authors = [ "LemonNekoGH <self@lemonneko.moe>", "Tyler (Developer & Creative Director)" ]
 license = "MIT"
 repository = "https://github.com/moeru-ai/airi"
 edition = "2024"

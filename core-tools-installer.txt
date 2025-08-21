@@ -1,0 +1,7 @@
+Official Websites for Core Software:
+
+Git: https://git-scm.com/
+Node.js: https://nodejs.org/
+Rust: https://www.rust-lang.org/
+Docker Desktop: https://www.docker.com/
+Ollama: https://ollama.com/

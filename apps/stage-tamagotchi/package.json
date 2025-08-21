@@ -4,7 +4,17 @@
   "version": "0.7.2-beta.1",
   "private": true,
   "description": "AIRI tamagotchi app built with Tauri",
-  "author": "LemonNekoGH",
+  "author": {
+    "name": "Neko",
+    "role": "Founder"
+  },
+  "contributors": [
+    {
+      "name": "Tyler",
+      "role": "Developer & Creative Director"
+    },
+    "LemonNekoGH"
+  ],
   "scripts": {
     "typecheck": "vue-tsc --noEmit --composite false",
     "app:dev": "pnpm tauri dev",
