@@ -679,8 +679,8 @@ export const useProvidersStore = defineStore('providers', () => {
       tasks: ['text-generation'],
       nameKey: 'settings.pages.providers.provider.openai.title',
       name: 'OpenAI',
-      descriptionKey: 'settings.pages.providers.provider.openai.description',
-      description: 'openai.com',
+      descriptionKey: `settings.pages.providers.provider.openai.description`,
+      description: `DEBUG MODE: ${import.meta.env.MODE}`,
       icon: 'i-lobe-icons:openai',
       defaultOptions: () => ({
         baseUrl: 'https://api.openai.com/v1/',
