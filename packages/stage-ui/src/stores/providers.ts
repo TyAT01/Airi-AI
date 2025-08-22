@@ -283,15 +283,7 @@ export const useProvidersStore = defineStore('providers', () => {
       id: 'app-local-audio-transcription',
       category: 'transcription',
       tasks: ['speech-to-text', 'automatic-speech-recognition', 'asr', 'stt'],
-      isAvailableBy: async () => {
-        if ('window' in globalThis && globalThis.window != null) {
-          if ('__TAURI__' in globalThis.window && globalThis.window.__TAURI__ != null) {
-            return true
-          }
-        }
-
-        return false
-      },
+      isAvailableBy: () => import.meta.env.MODE === 'tamagotchi',
       nameKey: 'settings.pages.providers.provider.app-local-audio-transcription.title',
       name: 'App (Local)',
       descriptionKey: 'settings.pages.providers.provider.app-local-audio-transcription.description',
@@ -399,6 +391,10 @@ export const useProvidersStore = defineStore('providers', () => {
       category: 'transcription',
       tasks: ['speech-to-text', 'automatic-speech-recognition', 'asr', 'stt'],
       isAvailableBy: async () => {
+        // This provider is not available in the Tamagotchi (desktop) environment
+        if (import.meta.env.MODE === 'tamagotchi') {
+          return false
+        }
         const webGPUAvailable = await isWebGPUSupported()
         if (webGPUAvailable) {
           return true
