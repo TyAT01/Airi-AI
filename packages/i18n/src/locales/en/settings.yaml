@@ -329,6 +329,9 @@ pages:
               If you do need to use this provider, you will need a dedicated
               proxy backend like a Serverless Function running on
             part6: or some CORS bypassing services to bypass the CORS restrictions.
+      azure_ai_foundry:
+        title: Azure AI Foundry
+        description: foundry.azure.com
       cloudflare-workers-ai:
         description: cloudflare.com
         fields:
