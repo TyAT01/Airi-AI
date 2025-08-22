@@ -25,26 +25,23 @@ pub struct McpState {
 #[allow(clippy::missing_panics_doc)]
 pub fn destroy<R: Runtime>(app_handle: &AppHandle<R>) {
   info!("Destroying MCP plugin");
+  let app_handle = app_handle.clone();
+  tauri::async_runtime::spawn(async move {
+    let state = app_handle.state::<Mutex<McpState>>();
 
-  tokio::runtime::Runtime::new()
-    .unwrap()
-    .block_on(async {
-      let state = app_handle.state::<Mutex<McpState>>();
+    let mut state = state.lock().await;
+    if state.client.is_none() {
+      info!("MCP plugin not connected, no need to disconnect");
+      return;
+    }
 
-      let mut state = state.lock().await;
-      if state.client.is_none() {
-        info!("MCP plugin not connected, no need to disconnect");
-        return;
-      }
+    let client = state.client.take().unwrap();
+    drop(state);
 
-      let client = state.client.take().unwrap();
-      drop(state);
-
-      client.cancel().await.unwrap();
-      // client.waiting().await.unwrap();
-    });
-
-  info!("MCP plugin destroyed");
+    client.cancel().await.unwrap();
+    // client.waiting().await.unwrap();
+    info!("MCP plugin destroyed");
+  });
 }
 
 #[tauri::command]

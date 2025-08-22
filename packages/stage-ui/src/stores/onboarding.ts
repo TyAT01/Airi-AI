@@ -15,10 +15,10 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   const shouldShowSetup = ref(false)
 
   // Check if any essential provider is configured
-  const hasEssentialProviderConfigured = computed(() => {
+  function hasEssentialProviderConfigured() {
     const essentialProviders = ['openai', 'anthropic', 'google-generative-ai', 'openrouter-ai', 'ollama', 'deepseek']
     return essentialProviders.some(providerId => providersStore.configuredProviders[providerId])
-  })
+  }
 
   // Check if first-time setup should be shown
   const needsOnboarding = computed(() => {
@@ -29,7 +29,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     }
 
     // Don't show if user already has essential providers configured
-    if (hasEssentialProviderConfigured.value) {
+    if (hasEssentialProviderConfigured()) {
       console.warn('Essential provider already configured, no onboarding needed')
       return false
     }
