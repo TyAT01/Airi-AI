@@ -495,6 +495,13 @@ export const useProvidersStore = defineStore('providers', () => {
           }
 
           // Check if the Ollama server is reachable
+          if (config.baseUrl === 'http://localhost:11434/v1/') {
+            return {
+              errors: [],
+              reason: 'Default URL, skipping health check.',
+              valid: false,
+            }
+          }
           return fetch(`${(config.baseUrl as string).trim()}models`, { headers: (config.headers as HeadersInit) || undefined })
             .then((response) => {
               const errors = [
@@ -1838,6 +1845,13 @@ export const useProvidersStore = defineStore('providers', () => {
           }
 
           // Check if the local running Player 2 is reachable
+          if (config.baseUrl === 'http://localhost:4315/v1/') {
+            return {
+              errors: [],
+              reason: 'Default URL, skipping health check.',
+              valid: false,
+            }
+          }
           return await fetch(`${(config.baseUrl as string).endsWith('/') ? (config.baseUrl as string).slice(0, -1) : config.baseUrl}/health`, {
             method: 'GET',
             headers: {
