@@ -2014,7 +2014,8 @@ export const useProvidersStore = defineStore('providers', () => {
   }
 
   // Call initially and watch for changes
-  watch(providerCredentials, updateConfigurationStatus, { deep: true, immediate: true })
+  watch(providerCredentials, updateConfigurationStatus, { deep: true })
+  updateConfigurationStatus()
 
   // Available providers (only those that are properly configured)
   const availableProviders = computed(() => Object.keys(providerMetadata).filter(providerId => configuredProviders.value[providerId]))
