@@ -122,6 +122,7 @@ watch(speed, async () => {
 </script>
 
 <template>
+  <h1>JULES' TEST</h1>
   <ProviderSettingsLayout
     :provider-name="providerMetadata?.localizedName || 'OpenAI'"
     :provider-icon="providerMetadata?.icon"
