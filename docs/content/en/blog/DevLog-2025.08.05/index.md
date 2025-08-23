@@ -17,7 +17,7 @@ function handleOpenLatest() {
 }
 </script>
 
-Hello again! Here's [Neko](https://github.com/nekomeowww).
+Hello again! Here's Tyler.
 
 Sorry for the long wait! v0.7 was supposed to be released in early July,
 but due to several critical Windows compatibility issues that kept us
@@ -198,7 +198,7 @@ file is required.
 
 #### Local ASR/STT
 
-Thanks to [@luoling8192 (Luoling)](https://github.com/luoling8192), and the experiments
+Thanks to [@luoling8192](https://github.com/luoling8192), and the experiments
 we have done in the repository [candle-examples](https://github.com/proj-airi/candle-examples),
 we now have a local ASR/STT engine that works on Windows, macOS and Linux.
 
@@ -228,7 +228,7 @@ We know that configuring AIRI is quite complex now (but still easy if comparing
 to many other pure Python based ones where you have to understand the code structure
 to configure it).
 
-Thanks to [Me1td0wn76 (melty kiss)](https://github.com/Me1td0wn76)'s contribution
+Thanks to [Me1td0wn76](https://github.com/Me1td0wn76)'s contribution
 adding support of adding onboarding screen for Web version, now you can
 have a much better experience when you first time using AIRI.
 
@@ -279,7 +279,7 @@ Onboarding is also available for Mobile Web version:
 
 The primary scene on mobile has been redesigned and rewritten completely.
 
-Thanks to [LemonNekoGH (LemonNeko)](https://github.com/LemonNekoGH), we now have a
+Thanks to [LemonNekoGH](https://github.com/LemonNekoGH), we now have a
 better way to adjust the offset of the Live2D model in the scene.
 
 We drawn this design idea from iOS's volume control on side, we hope you may find
@@ -308,7 +308,7 @@ We made many more new interesting components for the features.
 
 #### Better text animation
 
-We improved the text animation of the chat bubbles, [sumimakito (Makito)](https://github.com/sumimakito/)
+We improved the text animation of the chat bubbles, [sumimakito](https://github.com/sumimakito/)
 wrote a entire decent DevLog about it and posted just a few days ago explaining
 it in detail why we implemented it special and how we consider the i18n compatibility
 around it, definitely check it out: [DevLog 2025.08.01](../DevLog-2025.08.01/).
@@ -379,7 +379,7 @@ And as always, thanks to their beautiful design, we are using many
 of their components to build our own, do check them out!
 
 The blogs page looks good and better too, with new cover designed by
-[@lynzrand (Rynco Maekawa)](https://github.com/lynzrand)
+[@lynzrand](https://github.com/lynzrand)
 
 <img class="light" src="./assets/airi-docs-blogs-light.avif" alt="Time series chart light mode" />
 <img class="dark" src="./assets/airi-docs-blogs-dark.avif" alt="Time series chart dark mode" />
@@ -550,7 +550,7 @@ to 25 seconds in average**.
 
 ### Now Nix is supported
 
-Thanks to [@Weathercold (Weathercold)](https://github.com/Weathercold), we now
+Thanks to [@Weathercold](https://github.com/Weathercold), we now
 have a Nix flake to build AIRI, which is a great addition to the
 cross-platform compatibility. It works even on macOS.
 
@@ -590,7 +590,7 @@ Nightly builds can be found at https://github.com/moeru-ai/airi/actions/workflow
 
 New packages born between this release:
 
-> Big shout out to [@sumimakito](https://github.com/sumimakito), she did so many fantastic things... I can't even count them all...
+> Big shout out to [@sumimakito](https://github.com/sumimakito), they did so many fantastic things... I can't even count them all...
 
 - [`@proj-airi/chromatic`](https://github.com/proj-airi/chromatic) (by [@sumimakito](https://github.com/sumimakito))
 - [`@proj-airi/unocss-preset-chromatic`](https://github.com/proj-airi/chromatic) (by [@sumimakito](https://github.com/sumimakito))

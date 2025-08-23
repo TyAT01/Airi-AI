@@ -2,7 +2,7 @@
 name = "tauri-plugin-rdev"
 version.workspace = true
 description = "Integration of github.com/Narsil/rdev for Tauri"
-authors = [ "Neko Ayaka <neko@ayaka.moe>" ]
+authors = [ "Tyler <tyler@example.com>" ]
 license = "MIT"
 repository = "https://github.com/moeru-ai/airi"
 edition = "2024"

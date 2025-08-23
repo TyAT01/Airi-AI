@@ -2,7 +2,7 @@
 name = "tauri-plugin-ipc-audio-transcription-ort"
 version.workspace = true
 description = "Audio transcription plugin for Tauri using ONNX Runtime"
-authors = [ "Neko Ayaka <neko@ayaka.moe>" ]
+authors = [ "Tyler <tyler@example.com>" ]
 license = "MIT"
 repository = "https://github.com/moeru-ai/airi"
 edition = "2024"

@@ -48,8 +48,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
         run: |-
-          git config --local user.email "neko@ayaka.moe"
-          git config --local user.name "Neko Ayaka"
+          git config --local user.email "tyler@example.com"
+          git config --local user.name "Tyler"
           git commit -m "release: build ${{ github.sha }}"
           git lfs push origin main --all
           git push -f

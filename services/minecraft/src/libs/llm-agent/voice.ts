@@ -19,7 +19,7 @@ export async function handleVoiceInput(event: any, bot: MineflayerWithAgents, ag
 
   const statusPrompt = await generateStatusPrompt(bot)
   bot.memory.chatHistory.push(system(statusPrompt))
-  bot.memory.chatHistory.push(user(`NekoMeowww: ${event.data.transcription}`))
+  bot.memory.chatHistory.push(user(`Tyler: ${event.data.transcription}`))
 
   try {
     // Create and execute plan

@@ -22,14 +22,14 @@ import projectAIRIBannerDark from './assets/banner-dark-1280x640.avif';
 import ReLUStickerWow from './assets/relu-sticker-wow.avif'
 </script>
 
-Hello, it's me, Neko again!
+Hello, it's me, the founder, again!
 
 First of all, good summer for you folks living in north hemisphere!
 
 > Hopefully you could get a nice and decent summer break for trying out new
 > different of things! More specifically, change the world!
 
-Well, me, as [@nekomeowww](https://github.com/nekomeowww) have left
+Well, me, as the founder, have left
 school already 8 years, it's obvious that I wont get any actual summer
 break now since I've already worked for many years. I still love to
 memorize and share the stories happened for my summer break years ago
@@ -246,7 +246,7 @@ or Large Language Models (LLMs) in general, is from this post I saw on Hacker Ne
 [Building A Virtual Machine inside ChatGPT](https://www.engraved.blog/building-a-virtual-machine-inside/)
 ([original Hacker News post](https://news.ycombinator.com/item?id=33847479)), where
 the author, @engraved, demonstrated how to ask ChatGPT not only role playing as
-a neko-mimi character, but also simulating a virtual Linux machine inside.
+a cat-eared character, but also simulating a virtual Linux machine inside.
 
 <div class="w-full flex flex-col items-center justify-center">
   <img :src="buildingAVirtualMachineInsideImage" alt="Building a virtual machine inside ChatGPT" class="h-150! object-contain rounded-lg overflow-hidden" />

@@ -25,8 +25,10 @@ import DemoDayHangzhou2 from './assets/demo-day-hangzhou-2.avif'
 import DemoDayHangzhou3 from './assets/demo-day-hangzhou-3.avif'
 </script>
 
-Hello again! Here's [Neko](https://github.com/nekomeowww), the girl who started
+Hello again! Here's [Neko](https://github.com/nekomeowww), the founder of
 the [Project AIRI](https://github.com/moeru-ai/airi)!
+
+And let's welcome our new developer and creative director, Tyler / Ty!
 
 Sorry for being late for new update in
 Project AIRI through the posted DevLog, please forgive us

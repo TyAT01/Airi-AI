@@ -2,7 +2,7 @@
 name = "tauri-plugin-window-pass-through-on-hover"
 version.workspace = true
 description = "Fade on Hover (FoH), or pass through on hover of window, plugin for Tauri"
-authors = [ "Neko Ayaka <neko@ayaka.moe>" ]
+authors = [ "Tyler <tyler@example.com>" ]
 license = "MIT"
 repository = "https://github.com/moeru-ai/airi"
 edition = "2024"
