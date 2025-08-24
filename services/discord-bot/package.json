@@ -36,5 +36,8 @@
     "opusscript": "^0.1.1",
     "tsx": "^4.20.3",
     "wavefile": "^11.0.0"
+  },
+  "optionalDependencies": {
+    "inotify": "^1.4.6"
   }
 }
