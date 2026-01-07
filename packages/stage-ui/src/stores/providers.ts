@@ -11,6 +11,7 @@ import type {
 import type { ProgressInfo } from '@xsai-transformers/shared/types'
 import type {
   UnAlibabaCloudOptions,
+  UnDeepgramOptions,
   UnElevenLabsOptions,
   UnMicrosoftOptions,
   UnVolcengineOptions,
@@ -50,6 +51,7 @@ import { isWebGPUSupported } from 'gpuu/webgpu'
 import { defineStore } from 'pinia'
 import {
   createUnAlibabaCloud,
+  createUnDeepgram,
   createUnElevenLabs,
   createUnMicrosoft,
   createUnVolcengine,
@@ -452,11 +454,11 @@ export const useProvidersStore = defineStore('providers', () => {
       defaultOptions: () => ({
         baseUrl: 'http://localhost:11434/v1/',
       }),
-      createProvider: async config => createOllama((config.baseUrl as string).trim()),
+      createProvider: async config => createOllama('', (config.baseUrl as string).trim()),
       capabilities: {
         listModels: async (config) => {
           return (await listModels({
-            ...createOllama((config.baseUrl as string).trim()).model(),
+            ...createOllama('', (config.baseUrl as string).trim()).model(),
           })).map((model) => {
             return {
               id: model.id,
@@ -1125,6 +1127,62 @@ export const useProvidersStore = defineStore('providers', () => {
             errors,
             reason: errors.filter(e => e).map(e => String(e)).join(', ') || '',
             valid: !!config.apiKey && !!config.baseUrl,
+          }
+        },
+      },
+    },
+    'deepgram-tts': {
+      id: 'deepgram-tts',
+      category: 'speech',
+      tasks: ['text-to-speech'],
+      nameKey: 'settings.pages.providers.provider.deepgram-tts.title',
+      name: 'Deepgram',
+      descriptionKey: 'settings.pages.providers.provider.deepgram-tts.description',
+      description: 'deepgram.com',
+      icon: 'i-simple-icons:deepgram',
+      defaultOptions: () => ({
+        baseUrl: 'https://unspeech.hyp3r.link/v1/',
+      }),
+      createProvider: async (config) => {
+        const provider = createUnDeepgram((config.apiKey as string).trim(), (config.baseUrl as string).trim()) as SpeechProviderWithExtraOptions<string, UnDeepgramOptions>
+        return provider
+      },
+      capabilities: {
+        listVoices: async (config) => {
+          const provider = createUnDeepgram((config.apiKey as string).trim(), (config.baseUrl as string).trim()) as VoiceProviderWithExtraOptions<UnDeepgramOptions>
+
+          const voices = await listVoices({
+            ...provider.voice(),
+          })
+
+          return voices.map((voice) => {
+            return {
+              id: voice.id,
+              name: voice.name,
+              provider: 'deepgram-tts',
+              description: voice.description,
+              languages: voice.languages,
+              gender: voice.labels?.gender,
+            }
+          })
+        },
+      },
+      validators: {
+        validateProviderConfig: (config) => {
+          const errors: Error[] = []
+          if (!config.apiKey) {
+            errors.push(new Error('API key is required.'))
+          }
+
+          const baseUrlValidationResult = baseUrlValidator.value(config.baseUrl)
+          if (baseUrlValidationResult) {
+            errors.push(...(baseUrlValidationResult.errors as Error[]))
+          }
+
+          return {
+            errors,
+            reason: errors.map(e => e.message).join(', '),
+            valid: errors.length === 0,
           }
         },
       },
@@ -2117,12 +2175,22 @@ export const useProvidersStore = defineStore('providers', () => {
       }
     }
   }
+  const previousCredentialHashes = ref<Record<string, string>>({})
+
   // Watch for credential changes and refetch models accordingly
-  watch(providerCredentials, (newCreds, oldCreds) => {
-    // Determine which providers have changed credentials
-    const changedProviders = Object.keys(newCreds).filter(providerId =>
-      JSON.stringify(newCreds[providerId]) !== JSON.stringify(oldCreds?.[providerId]),
-    )
+  watch(providerCredentials, (newCreds) => {
+    const changedProviders: string[] = []
+
+    for (const providerId in newCreds) {
+      const currentConfig = newCreds[providerId]
+      const currentHash = JSON.stringify(currentConfig)
+      const previousHash = previousCredentialHashes.value[providerId]
+
+      if (currentHash !== previousHash) {
+        changedProviders.push(providerId)
+        previousCredentialHashes.value[providerId] = currentHash
+      }
+    }
 
     for (const providerId of changedProviders) {
       // Since credentials changed, dispose the cached instance so new creds take effect.
@@ -2133,7 +2201,7 @@ export const useProvidersStore = defineStore('providers', () => {
         fetchModelsForProvider(providerId)
       }
     }
-  }, { deep: true })
+  }, { deep: true, immediate: true })
 
   // Function to get localized provider metadata
   function getProviderMetadata(providerId: string) {

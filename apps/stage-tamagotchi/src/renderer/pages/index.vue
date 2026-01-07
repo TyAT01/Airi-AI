@@ -13,12 +13,12 @@ import { useConsciousnessStore } from '@proj-airi/stage-ui/stores/modules/consci
 import { useHearingSpeechInputPipeline } from '@proj-airi/stage-ui/stores/modules/hearing'
 import { useProvidersStore } from '@proj-airi/stage-ui/stores/providers'
 import { useSettingsAudioDevice } from '@proj-airi/stage-ui/stores/settings'
-import { refDebounced, useBroadcastChannel, watchPausable } from '@vueuse/core'
+import { refDebounced, useBroadcastChannel } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, onUnmounted, ref, toRef, watch } from 'vue'
 
-import ControlsIsland from '../components/StageIslands/ControlsIsland/index.vue'
-import ResourceStatusIsland from '../components/StageIslands/ResourceStatusIsland/index.vue'
+import ControlsIsland from '../components/stage-islands/controls-island/index.vue'
+import ResourceStatusIsland from '../components/stage-islands/resource-status-island/index.vue'
 
 import { electron } from '../../shared/electron'
 import {
@@ -61,7 +61,7 @@ const { fadeOnHoverEnabled } = storeToRefs(useControlsIslandStore())
 
 watch(componentStateStage, () => isLoading.value = componentStateStage.value !== 'mounted', { immediate: true })
 
-const { pause, resume } = watchPausable(isTransparent, (transparent) => {
+const { pause, resume } = watch(isTransparent, (transparent) => {
   shouldFadeOnCursorWithin.value = fadeOnHoverEnabled.value && !transparent
 }, { immediate: true })
 
