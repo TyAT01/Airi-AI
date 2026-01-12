@@ -3,7 +3,7 @@ import { defineInvoke, defineInvokeHandler } from '@moeru/eventa'
 import { themeColorFromValue, useThemeColor } from '@proj-airi/stage-layouts/composables/theme-color'
 import { ToasterRoot } from '@proj-airi/stage-ui/components'
 import { useSharedAnalyticsStore } from '@proj-airi/stage-ui/stores/analytics'
-import { useCharacterOrchestratorStore } from '@proj-airi/stage-ui/stores/character-orchestrator'
+import { useCharacterOrchestratorStore } from '@proj-airi/stage-ui/stores/character'
 import { useDisplayModelsStore } from '@proj-airi/stage-ui/stores/display-models'
 import { useModsServerChannelStore } from '@proj-airi/stage-ui/stores/mods/api/channel-server'
 import { useContextBridgeStore } from '@proj-airi/stage-ui/stores/mods/api/context-bridge'
@@ -17,6 +17,8 @@ import { onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { toast, Toaster } from 'vue-sonner'
+
+import ResizeHandler from './components/ResizeHandler.vue'
 
 import { electronOpenSettings, electronStartTrackMousePosition } from '../shared/eventa'
 import { useElectronEventaContext } from './composables/electron-vueuse'
@@ -81,6 +83,7 @@ onUnmounted(() => contextBridgeStore.dispose())
   <ToasterRoot @close="id => toast.dismiss(id)">
     <Toaster />
   </ToasterRoot>
+  <ResizeHandler />
   <RouterView />
 </template>
 
