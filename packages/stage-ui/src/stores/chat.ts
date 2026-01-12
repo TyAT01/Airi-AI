@@ -12,6 +12,8 @@ import { ref, toRaw } from 'vue'
 import { useAnalytics } from '../composables'
 import { useLlmmarkerParser } from '../composables/llm-marker-parser'
 import { categorizeResponse, createStreamingCategorizer } from '../composables/response-categoriser'
+import { useLongTermMemoryStore } from './memory/long-term'
+import { useShortTermMemoryStore } from './memory/short-term'
 import { useChatContextStore } from './chat/context-store'
 import { createChatHooks } from './chat/hooks'
 import { useChatSessionStore } from './chat/session-store'
@@ -51,6 +53,8 @@ export const useChatOrchestratorStore = defineStore('chat-orchestrator', () => {
   const chatContext = useChatContextStore()
   const { activeSessionId } = storeToRefs(chatSession)
   const { streamingMessage } = storeToRefs(chatStream)
+  const shortTermMemory = useShortTermMemoryStore()
+  const longTermMemory = useLongTermMemoryStore()
 
   const sending = ref(false)
   const pendingQueuedSends = ref<QueuedSend[]>([])
@@ -248,7 +252,32 @@ export const useChatOrchestratorStore = defineStore('chat-orchestrator', () => {
       })
 
       const contextsSnapshot = chatContext.getContextsSnapshot()
+      const shortTermSnapshot = shortTermMemory.getSnapshot({ limit: 12 })
+      const longTermSnapshot = longTermMemory.getSnapshot({ limit: 12 })
+      const supplementaryContext: string[] = []
+
+      if (shortTermSnapshot.length > 0) {
+        supplementaryContext.push([
+          'Short-term memory:',
+          ...shortTermSnapshot.map(entry => `- ${entry.content}`),
+        ].join('\n'))
+      }
+
+      if (longTermSnapshot.length > 0) {
+        supplementaryContext.push([
+          'Long-term memory:',
+          ...longTermSnapshot.map(entry => `- ${entry.content}`),
+        ].join('\n'))
+      }
+
       if (Object.keys(contextsSnapshot).length > 0) {
+        supplementaryContext.push(
+          'These are the contextual information retrieved or on-demand updated from other modules, you may use them as context for chat, or reference of the next action, tool call, etc.:\n'
+            + `${Object.entries(contextsSnapshot).map(([key, value]) => `Module ${key}: ${JSON.stringify(value)}`).join('\n')}\n`,
+        )
+      }
+
+      if (supplementaryContext.length > 0) {
         const system = newMessages.slice(0, 1)
         const afterSystem = newMessages.slice(1, newMessages.length)
 
@@ -259,9 +288,7 @@ export const useChatOrchestratorStore = defineStore('chat-orchestrator', () => {
             content: [
               {
                 type: 'text',
-                text: ''
-                  + 'These are the contextual information retrieved or on-demand updated from other modules, you may use them as context for chat, or reference of the next action, tool call, etc.:\n'
-                  + `${Object.entries(contextsSnapshot).map(([key, value]) => `Module ${key}: ${JSON.stringify(value)}`).join('\n')}\n`,
+                text: supplementaryContext.join('\n\n'),
               },
             ],
           },
@@ -328,6 +355,15 @@ export const useChatOrchestratorStore = defineStore('chat-orchestrator', () => {
         outputText: fullText,
         toolCalls: sessionMessagesForSend.filter(msg => msg.role === 'tool') as ToolMessage[],
       }, streamingMessageContext)
+
+      const normalizedInput = sendingMessage.trim()
+      const normalizedOutput = fullText.trim()
+      if (normalizedInput && normalizedOutput) {
+        const memoryContent = `User: ${normalizedInput}\nAssistant: ${normalizedOutput}`
+        const metadata = { sessionId, provider: activeProvider.value }
+        shortTermMemory.remember(memoryContent, { metadata })
+        longTermMemory.remember(memoryContent, { metadata })
+      }
 
       if (isForegroundSession()) {
         streamingMessage.value = { role: 'assistant', content: '', slices: [], tool_results: [] }
