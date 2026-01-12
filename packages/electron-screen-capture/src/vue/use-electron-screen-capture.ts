@@ -6,19 +6,22 @@ import type { ScreenCaptureSetSourceRequest, SerializableDesktopCapturerSource }
 
 import { defineInvoke } from '@moeru/eventa'
 import { createContext } from '@moeru/eventa/adapters/electron/renderer'
-import { toValue } from 'vue'
+import { toRaw, toValue } from 'vue'
 
-import { screenCaptureGetSources, screenCaptureResetSource, screenCaptureSetSourceEx } from '..'
+import { screenCapture } from '..'
 
 export function useElectronScreenCapture(ipcRenderer: IpcRenderer, sourcesOptions: MaybeRefOrGetter<SourcesOptions>) {
   const context = createContext(ipcRenderer).context
 
-  const invokeGetSources = defineInvoke(context, screenCaptureGetSources)
-  const setSource = defineInvoke(context, screenCaptureSetSourceEx)
-  const resetSource = defineInvoke(context, screenCaptureResetSource)
+  const invokeGetSources = defineInvoke(context, screenCapture.getSources)
+  const setSource = defineInvoke(context, screenCapture.setSource)
+  const resetSource = defineInvoke(context, screenCapture.resetSource)
+
+  const checkMacOSPermission = defineInvoke(context, screenCapture.checkMacOSPermission)
+  const requestMacOSPermission = defineInvoke(context, screenCapture.requestMacOSPermission)
 
   async function getSources() {
-    return invokeGetSources(toValue(sourcesOptions))
+    return invokeGetSources(toRaw(toValue(sourcesOptions)))
   }
 
   async function selectWithSource<R>(
@@ -32,7 +35,7 @@ export function useElectronScreenCapture(ipcRenderer: IpcRenderer, sourcesOption
     let handle: string | undefined
     try {
       handle = await setSource({
-        options: toValue(sourcesOptions),
+        options: toRaw(toValue(sourcesOptions)),
         sourceId,
         timeout: request?.timeout,
       })
@@ -45,5 +48,12 @@ export function useElectronScreenCapture(ipcRenderer: IpcRenderer, sourcesOption
     }
   }
 
-  return { getSources, setSource, resetSource, selectWithSource }
+  return {
+    getSources,
+    setSource,
+    resetSource,
+    selectWithSource,
+    checkMacOSPermission,
+    requestMacOSPermission,
+  }
 }

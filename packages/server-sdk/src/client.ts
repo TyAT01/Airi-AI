@@ -7,6 +7,7 @@ import type {
 } from '@proj-airi/server-shared/types'
 
 import WebSocket from 'crossws/websocket'
+import superjson from 'superjson'
 
 import { sleep } from '@moeru/std'
 import {
@@ -252,7 +253,12 @@ export class Client<C = undefined> {
 
   private async handleMessage(event: MessageEvent) {
     try {
-      const data = JSON.parse(event.data as string) as WebSocketEvent<C>
+      const data = superjson.parse<WebSocketEvent<C> | undefined>(event.data as string)
+      if (!data) {
+        console.warn('Received empty message')
+        return
+      }
+
       this.opts.onAnyMessage?.(data)
       const listeners = this.eventListeners.get(data.type)
       if (!listeners?.size) {
@@ -321,7 +327,7 @@ export class Client<C = undefined> {
 
       this.opts.onAnySend?.(payload)
 
-      this.websocket.send(JSON.stringify(payload))
+      this.websocket.send(superjson.stringify(payload))
     }
   }
 

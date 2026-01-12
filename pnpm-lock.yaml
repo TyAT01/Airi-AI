@@ -147,6 +147,12 @@ catalogs:
     splitpanes:
       specifier: ^4.0.4
       version: 4.0.4
+    std-env:
+      specifier: ^3.10.0
+      version: 3.10.0
+    superjson:
+      specifier: ^2.2.6
+      version: 2.2.6
     tsx:
       specifier: ^4.21.0
       version: 4.21.0
@@ -1201,7 +1207,7 @@ importers:
         specifier: ^3.2.3
         version: 3.2.3
       electron:
-        specifier: ^39.2.7
+        specifier: 'catalog:'
         version: 39.2.7
       electron-builder:
         specifier: ^26.4.0
@@ -1810,12 +1816,24 @@ importers:
       '@moeru/std':
         specifier: 'catalog:'
         version: 0.1.0-beta.14
+      '@proj-airi/stream-kit':
+        specifier: workspace:^
+        version: link:../stream-kit
       clustr:
         specifier: ^1.0.2
         version: 1.0.2
 
   packages/electron-screen-capture:
     dependencies:
+      '@guiiai/logg':
+        specifier: '>=1 <2'
+        version: 1.2.11
+      electron:
+        specifier: '>=39 <40'
+        version: 39.2.7
+      std-env:
+        specifier: 'catalog:'
+        version: 3.10.0
       vue:
         specifier: '>=3'
         version: 3.5.25(typescript@5.9.3)
@@ -1823,9 +1841,6 @@ importers:
       '@electron-toolkit/preload':
         specifier: 'catalog:'
         version: 3.0.2(electron@39.2.7)
-      '@guiiai/logg':
-        specifier: 'catalog:'
-        version: 1.2.11
       '@moeru/eventa':
         specifier: 'catalog:'
         version: 1.0.0-alpha.10(electron@39.2.7)(h3@2.0.1-rc.5(crossws@0.4.1(srvx@0.9.8(patch_hash=f0151386fdcbcb6f53833cf8f66926ef2eb31b71a2782d6e0960dec832ef108d))))
@@ -1835,9 +1850,6 @@ importers:
       async-mutex:
         specifier: 'catalog:'
         version: 0.5.0
-      electron:
-        specifier: 'catalog:'
-        version: 39.2.7
       nanoid:
         specifier: 'catalog:'
         version: 5.1.6
@@ -1954,6 +1966,9 @@ importers:
       defu:
         specifier: ^6.1.4
         version: 6.1.4
+      superjson:
+        specifier: 'catalog:'
+        version: 2.2.6
     devDependencies:
       '@moeru/std':
         specifier: 'catalog:'
@@ -2230,6 +2245,9 @@ importers:
       '@proj-airi/chromatic':
         specifier: ^1.0.2
         version: 1.0.2
+      '@proj-airi/core-character':
+        specifier: workspace:^
+        version: link:../core-character
       '@proj-airi/drizzle-duckdb-wasm':
         specifier: 'catalog:'
         version: 0.4.29(drizzle-orm@0.45.1(@electric-sql/pglite@0.3.14)(@opentelemetry/api@1.9.0)(@prisma/client@5.22.0)(@types/pg@8.16.0)(better-sqlite3@12.5.0)(kysely@0.28.9)(pg@8.16.3)(postgres@3.4.7))
