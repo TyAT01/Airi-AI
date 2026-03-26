@@ -14,11 +14,16 @@ class GamingModule:
         self.config = GamingModuleConfig(serverPort=default_port)
 
     def update_config(self, updates: Dict[str, Any]):
+        # Mimics Pinia store saving settings
         new_config_dict = self.config.dict(by_alias=True)
         new_config_dict.update(updates)
         self.config = GamingModuleConfig(**new_config_dict)
 
-    def is_configured(self) -> bool:
+    def reset_state(self):
+        self.config = GamingModuleConfig(serverPort=self.default_port)
+
+    @property
+    def configured(self) -> bool:
         return bool(self.config.server_address.strip() and self.config.username.strip() and self.config.server_port is not None)
 
 class MinecraftModule(GamingModule):

@@ -24,6 +24,9 @@ class MCPClient:
 class MCPManager:
     def __init__(self):
         self.clients: Dict[str, MCPClient] = {}
+        self.server_cmd: str = ""
+        self.server_args: str = ""
+        self.connected: bool = False
 
     def add_client(self, name: str, server_url: str):
         self.clients[name] = MCPClient(server_url)
@@ -31,3 +34,9 @@ class MCPManager:
     async def initialize_all(self):
         for client in self.clients.values():
             await client.connect()
+
+    def reset_state(self):
+        self.server_cmd = ""
+        self.server_args = ""
+        self.connected = False
+        logger.info("MCP state reset")
