@@ -1,6 +1,7 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, Field
+from core.utils.event_source import get_event_source_key
 
 logger = logging.getLogger("airi_chat_context_store")
 
@@ -20,7 +21,11 @@ class ChatContextStore:
         self.active_contexts: Dict[str, List[ContextMessage]] = {}
         self.context_history: List[ContextHistoryEntry] = []
 
-    def ingest_context_message(self, envelope: ContextMessage, source_key: str):
+    def ingest_context_message(self, envelope: Union[ContextMessage, Dict[str, Any]]):
+        if isinstance(envelope, dict):
+            envelope = ContextMessage(**envelope)
+
+        source_key = get_event_source_key(envelope)
         if source_key not in self.active_contexts:
             self.active_contexts[source_key] = []
 
