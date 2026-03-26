@@ -63,3 +63,18 @@ class SpeechStore:
         logger.info(f"Generating speech for: {text[:50]}...")
         # Placeholder for TTS generation
         return b"audio data"
+
+class SpeechPipeline:
+    def __init__(self):
+        self.active_intent_id: Optional[str] = None
+        self.is_speaking: bool = False
+
+    async def speak(self, text: str):
+        logger.info(f"Speaking: {text}")
+        self.is_speaking = True
+        # Logic to send audio to output
+        self.is_speaking = False
+
+    def stop(self):
+        logger.info("Stopping speech")
+        self.is_speaking = False
