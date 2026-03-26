@@ -17,6 +17,12 @@ from agents.gaming import MinecraftModule, FactorioModule
 from plugins.base import PluginManager
 from schemas.protocol import SparkNotifyEvent
 
+# Import new services
+from services.api_server import AiriAPIServer
+from services.discord_bot import DiscordService
+from services.telegram_bot import TelegramService
+from services.twitter import TwitterService
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -25,74 +31,50 @@ logging.basicConfig(
 logger = logging.getLogger("airi_main")
 
 async def main():
-    # Load configuration from environment or use defaults
+    # Load configuration
     api_key = os.getenv("OPENAI_API_KEY", "placeholder_key")
-    base_url = os.getenv("OPENAI_BASE_URL", None)
+    discord_token = os.getenv("DISCORD_TOKEN", "")
+    telegram_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
     # 1. Initialize Core components
-    character_card_manager = CharacterCardManager()
     character = CharacterState(name="Airi")
     notebook = CharacterNotebook()
     memory = MemorySystem()
-    llm = LLMClient(api_key=api_key, base_url=base_url)
-
-    # 2. Initialize Perception & Expression
-    hearing = HearingStore()
-    vision = VisionStore()
+    llm = LLMClient(api_key=api_key)
     speech = SpeechPipeline()
 
-    # 3. Initialize Orchestrator
     orchestrator = CharacterOrchestrator(
         character=character,
         notebook=notebook,
         llm=llm,
-        active_model="gpt-4o",
         tts=speech
     )
 
-    # 4. Initialize Gaming Modules
-    minecraft = MinecraftModule()
-    factorio = FactorioModule()
+    # 2. Initialize Services
+    api = AiriAPIServer()
+    discord = DiscordService(discord_token, "ws://localhost:8000/ws")
+    telegram = TelegramService(telegram_token)
 
-    # 5. Initialize Plugin Manager
-    plugin_manager = PluginManager()
-    # (Future: dynamic plugin loading)
-
-    # 6. Initialize Server
+    # 3. Initialize Server
     server = AiriServer()
 
-    # 7. Integration Logic
-    async def on_server_event(event_dict: Dict[str, Any]):
-        event_type = event_dict.get("type")
+    # 4. Mount API onto the main app or run separately
+    # For this implementation, we combine them into the FastAPI app if possible
+    # server.app.mount("/api", api.app) # Example integration
 
-        # Broadcast to plugins
-        await plugin_manager.broadcast_event(event_dict)
-
-        if event_type == "spark:notify":
-            try:
-                event = SparkNotifyEvent(**event_dict["data"])
-                await orchestrator.handle_incoming_spark_notify(event)
-            except Exception as e:
-                logger.error(f"Failed to handle spark:notify in orchestrator: {e}")
-
-        elif event_type == "input:text":
-            # Direct text input handling
-            text = event_dict["data"].get("text", "")
-            logger.info(f"Direct text input received: {text}")
-            # Could trigger orchestrator directly here
-
-    server.set_on_event_callback(on_server_event)
-
-    # 8. Startup
-    logger.info("Starting Airi Python Core...")
+    # 5. Startup
+    logger.info("Starting Airi Python Core and Services...")
     await orchestrator.start()
-    await plugin_manager.initialize_all()
 
-    # 9. Start Server
+    # Background tasks for bots
+    asyncio.create_task(discord.start())
+    asyncio.create_task(telegram.start())
+
+    # 6. Start Server
     config = uvicorn.Config(server.app, host="0.0.0.0", port=8000, log_level="info")
     uvicorn_server = uvicorn.Server(config)
 
-    logger.info("Airi Python is fully initialized and ready.")
+    logger.info("Airi Python is fully operational.")
     await uvicorn_server.serve()
 
 if __name__ == "__main__":
