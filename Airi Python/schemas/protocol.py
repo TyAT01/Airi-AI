@@ -1,0 +1,123 @@
+from typing import List, Optional, Dict, Any, Union, Literal
+from pydantic import BaseModel, Field
+from enum import Enum
+import time
+
+class MessageHeartbeatKind(str, Enum):
+    PING = "ping"
+    PONG = "pong"
+
+class PluginIdentity(BaseModel):
+    id: str
+    version: Optional[str] = None
+    labels: Optional[Dict[str, str]] = None
+
+class ModuleIdentity(BaseModel):
+    id: str
+    kind: Literal["plugin"]
+    plugin: PluginIdentity
+    labels: Optional[Dict[str, str]] = None
+
+class EventBaseMetadata(BaseModel):
+    source: Optional[ModuleIdentity] = None
+    id: Optional[str] = None
+    parent_id: Optional[str] = Field(None, alias="parentId")
+
+class WebSocketEventMetadata(BaseModel):
+    source: ModuleIdentity
+    event: Dict[str, Any] # Contains id and parentId
+
+class RouteConfig(BaseModel):
+    destinations: Optional[List[Union[str, Dict[str, Any]]]] = None
+    bypass: Optional[bool] = None
+
+class WebSocketBaseEvent(BaseModel):
+    type: str
+    data: Dict[str, Any]
+    metadata: WebSocketEventMetadata
+    route: Optional[RouteConfig] = None
+
+class SparkNotifyEvent(BaseModel):
+    id: str
+    event_id: str = Field(..., alias="eventId")
+    lane: Optional[str] = None
+    kind: Literal["alarm", "ping", "reminder"]
+    urgency: Literal["immediate", "soon", "later"]
+    headline: str
+    note: Optional[str] = None
+    payload: Optional[Dict[str, Any]] = None
+    ttl_ms: Optional[int] = Field(None, alias="ttlMs")
+    requires_ack: Optional[bool] = Field(None, alias="requiresAck")
+    destinations: List[str]
+    metadata: Optional[Dict[str, Any]] = None
+
+class SparkEmitEvent(BaseModel):
+    id: str
+    event_id: Optional[str] = Field(None, alias="eventId")
+    state: Literal["queued", "working", "done", "dropped", "blocked", "expired"]
+    note: Optional[str] = None
+    destinations: List[str]
+    metadata: Optional[Dict[str, Any]] = None
+
+class SparkCommandGuidanceOption(BaseModel):
+    label: str
+    steps: List[str]
+    rationale: Optional[str] = None
+    possible_outcome: Optional[List[str]] = Field(None, alias="possibleOutcome")
+    risk: Optional[Literal["high", "medium", "low", "none"]] = None
+    fallback: Optional[List[str]] = None
+    triggers: Optional[List[str]] = None
+
+class SparkCommandGuidance(BaseModel):
+    type: Literal["proposal", "instruction", "memory-recall"]
+    persona: Optional[Dict[str, Literal["very-high", "high", "medium", "low", "very-low"]]] = None
+    options: List[SparkCommandGuidanceOption]
+
+class SparkCommandEvent(BaseModel):
+    id: str
+    event_id: Optional[str] = Field(None, alias="eventId")
+    parent_event_id: Optional[str] = Field(None, alias="parentEventId")
+    command_id: str = Field(..., alias="commandId")
+    interrupt: Union[Literal["force", "soft"], bool]
+    priority: Literal["critical", "high", "normal", "low"]
+    intent: Literal["plan", "proposal", "action", "pause", "resume", "reroute", "context"]
+    ack: Optional[str] = None
+    guidance: Optional[SparkCommandGuidance] = None
+    contexts: Optional[List[Dict[str, Any]]] = None
+    destinations: List[str]
+
+class TransportConnectionHeartbeatEvent(BaseModel):
+    kind: MessageHeartbeatKind
+    message: str
+    at: Optional[float] = Field(default_factory=time.time)
+
+class ModuleAuthenticateEvent(BaseModel):
+    token: str
+
+class ModuleAuthenticatedEvent(BaseModel):
+    authenticated: bool
+
+class RegistryModulesSyncEvent(BaseModel):
+    modules: List[Dict[str, Any]]
+
+class ModuleAnnounceEvent(BaseModel):
+    name: str
+    identity: ModuleIdentity
+    possible_events: List[str] = Field(..., alias="possibleEvents")
+    permissions: Optional[Dict[str, Any]] = None
+    config_schema: Optional[Dict[str, Any]] = Field(None, alias="configSchema")
+    dependencies: Optional[List[Dict[str, Any]]] = None
+
+class ModuleAnnouncedEvent(BaseModel):
+    name: str
+    index: Optional[int] = None
+    identity: ModuleIdentity
+
+class ModuleDeAnnouncedEvent(BaseModel):
+    name: str
+    index: Optional[int] = None
+    identity: ModuleIdentity
+    reason: Optional[str] = None
+
+class ErrorEvent(BaseModel):
+    message: str
