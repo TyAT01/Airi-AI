@@ -5,9 +5,10 @@ from abc import ABC, abstractmethod
 logger = logging.getLogger("airi_plugins")
 
 class AiriPlugin(ABC):
-    def __init__(self, plugin_id: str, name: str):
+    def __init__(self, plugin_id: str, name: str, context: Optional[Dict[str, Any]] = None):
         self.plugin_id = plugin_id
         self.name = name
+        self.context = context or {}
         self.enabled = False
 
     @abstractmethod
@@ -23,8 +24,9 @@ class AiriPlugin(ABC):
         pass
 
 class PluginManager:
-    def __init__(self):
+    def __init__(self, context: Optional[Dict[str, Any]] = None):
         self.plugins: Dict[str, AiriPlugin] = {}
+        self.context = context or {}
 
     def register_plugin(self, plugin: AiriPlugin):
         logger.info(f"Registering plugin: {plugin.name} ({plugin.plugin_id})")
