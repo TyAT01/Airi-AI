@@ -10,6 +10,7 @@ from core.character import CharacterState
 from core.notebook import CharacterNotebook
 from llm.client import LLMClient
 from schemas.protocol import SparkNotifyEvent, SparkCommandEvent
+from agents.spark_handler import SparkNotifyAgent
 
 logger = logging.getLogger("airi_orchestrator")
 
@@ -37,6 +38,7 @@ class CharacterOrchestrator:
         self.requeue_delay_ms = 30000
         self.max_attempts = 3
         self.running = False
+        self.spark_agent = SparkNotifyAgent(character, llm, active_model)
 
     async def start(self):
         self.running = True
@@ -113,34 +115,21 @@ class CharacterOrchestrator:
         logger.info(f"Processing spark:notify: {event.headline}")
 
         try:
-            # Porting logic from event-handler-spark-notify
-            system_msg = f"{self.character.system_prompt}\n\n" + \
-                "This is AIRI system, the life pod hosting your consciousness.\n" + \
-                f"Another module triggered spark:notify event for you to checkout.\n" + \
-                "For any of the output that is not a tool call, it will be streamed to user's interface."
-
-            user_msg = json.dumps({
-                "notify": event.dict(by_alias=True),
-            }, indent=2)
-
-            messages = [
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": user_msg}
-            ]
-
-            # In a real implementation, we'd handle tool calls here
-            response = await self.llm.stream_chat(
-                model=self.active_model,
-                messages=messages
-            )
+            # Use the specialized SparkNotifyAgent
+            response = await self.spark_agent.handle_event(event)
 
             self.character.record_reaction(
-                message=response["text"],
+                message=response.reaction,
                 source_event_id=event.id
             )
 
-            if self.tts and response["text"]:
-                await self.tts.speak(response["text"])
+            if self.tts and response.reaction:
+                await self.tts.speak(response.reaction)
+
+            # Broadcast generated commands if any
+            if response.commands:
+                logger.info(f"Generated {len(response.commands)} commands from spark notify.")
+                # Logic to send commands to server would go here
 
             # Remove from pending
             self.pending_notifies = [n for n in self.pending_notifies if n.id != event.id]
