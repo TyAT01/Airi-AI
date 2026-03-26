@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict, Any, Optional
+import asyncio
+from typing import List, Dict, Any, Optional, Union, Callable, Awaitable
 from pydantic import BaseModel, Field
 from core.providers import ProvidersStore, VoiceInfo
 
@@ -26,26 +27,79 @@ class SpeechStore:
     def configured(self) -> bool:
         if self.active_speech_provider == "speech-noop":
             return False
-        return bool(self.active_speech_model and self.active_speech_voice_id)
+        if not self.active_speech_provider:
+            return False
 
-    async def load_voices_for_provider(self, provider_id: str):
-        if not provider_id:
+        has_model = bool(self.active_speech_model)
+        has_voice = bool(self.active_speech_voice_id)
+
+        # For OpenAI Compatible providers, check provider config as fallback
+        if self.active_speech_provider == 'openai-compatible-audio-speech':
+            provider_config = self.providers_store.get_provider_config(self.active_speech_provider)
+            has_model |= bool(provider_config.get("model", ""))
+            has_voice |= bool(provider_config.get("voice", ""))
+
+        return has_model and has_voice
+
+    async def load_voices_for_provider(self, provider: str):
+        if not provider:
             return []
 
         self.is_loading_voices = True
         self.speech_provider_error = None
 
         try:
-            # Placeholder for listing voices via provider API
-            voices = []
-            self.available_voices[provider_id] = voices
+            # Simplified for porting logic
+            metadata = self.providers_store.provider_metadata.get(provider)
+            if not metadata:
+                return []
+
+            # Use capabilities to fetch voices if metadata has list_voices function
+            # This logic mimics store.ts
+            voices = [] # Placeholder for real call
+            self.available_voices[provider] = voices
             return voices
         except Exception as e:
-            logger.error(f"Error fetching voices for {provider_id}: {e}")
+            logger.error(f"Error fetching voices for {provider}: {e}")
             self.speech_provider_error = str(e)
             return []
         finally:
             self.is_loading_voices = False
+
+    def get_voices_for_provider(self, provider: str):
+        return self.available_voices.get(provider, [])
+
+    async def speech(
+        self,
+        provider: Any, # Provider instance
+        model: str,
+        input_text: str,
+        voice: str,
+        provider_config: Optional[Dict[str, Any]] = None
+    ) -> bytes:
+        logger.info(f"Generating speech with {model} for: {input_text[:50]}...")
+        # Placeholder for TTS call
+        return b"audio data placeholder"
+
+    def generate_ssml(
+        self,
+        text: str,
+        voice: VoiceInfo,
+        provider_config: Optional[Dict[str, Any]] = None
+    ) -> str:
+        # Simplified SSML generation for Python port
+        pitch = provider_config.get("pitch", 0.0) if provider_config else 0.0
+        rate = provider_config.get("rate", 1.0) if provider_config else 1.0
+
+        lang = voice.languages[0].get("code", "en-US") if voice.languages else "en-US"
+
+        return (
+            f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='{lang}'>"
+            f"<voice name='{voice.id}'>"
+            f"<prosody pitch='{pitch}' rate='{rate}'>"
+            f"{text}"
+            f"</prosody></voice></speak>"
+        )
 
     def reset_state(self):
         self.active_speech_provider = "speech-noop"
@@ -58,11 +112,6 @@ class SpeechStore:
         self.selected_language = "en-US"
         self.available_voices = {}
         logger.info("Speech store reset")
-
-    async def generate_speech(self, text: str) -> bytes:
-        logger.info(f"Generating speech for: {text[:50]}...")
-        # Placeholder for TTS generation
-        return b"audio data"
 
 class SpeechPipeline:
     def __init__(self):
