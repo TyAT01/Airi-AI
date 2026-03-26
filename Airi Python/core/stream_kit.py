@@ -1,18 +1,54 @@
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional, Callable, Awaitable
+from typing import List, Dict, Any, Optional, Callable, Awaitable, TypeVar, Generic
+
+T = TypeVar('T')
 
 logger = logging.getLogger("airi_stream_kit")
 
-class StreamQueue:
-    def __init__(self, handlers: List[Callable[[Dict[str, Any]], Awaitable[None]]]):
+class HandlerContext(Generic[T]):
+    def __init__(self, data: T, emit_cb: Callable[[str, Any], None]):
+        self.data = data
+        self.emit_cb = emit_cb
+
+    def emit(self, event_name: str, *params):
+        self.emit_cb(event_name, *params)
+
+class StreamQueue(Generic[T]):
+    def __init__(self, handlers: List[Callable[[HandlerContext[T]], Awaitable[None]]]):
         self.handlers = handlers
         self.queue = asyncio.Queue()
         self.is_draining = False
+        self.listeners = {
+            "enqueue": [],
+            "dequeue": [],
+            "process": [],
+            "error": [],
+            "result": [],
+            "drain": []
+        }
+        self.handler_listeners: Dict[str, List[Callable]] = {}
 
-    async def enqueue(self, payload: Any):
+    def on(self, event_name: str, callback: Callable):
+        if event_name in self.listeners:
+            self.listeners[event_name].append(callback)
+
+    def on_handler_event(self, event_name: str, callback: Callable):
+        if event_name not in self.handler_listeners:
+            self.handler_listeners[event_name] = []
+        self.handler_listeners[event_name].append(callback)
+
+    def _emit(self, event_name: str, *params):
+        for callback in self.listeners.get(event_name, []):
+            callback(*params)
+
+    def _emit_handler(self, event_name: str, *params):
+        for callback in self.handler_listeners.get(event_name, []):
+            callback(*params)
+
+    async def enqueue(self, payload: T):
         await self.queue.put(payload)
-        logger.debug(f"Enqueued: {payload}")
+        self._emit("enqueue", payload, self.queue.qsize())
         if not self.is_draining:
             asyncio.create_task(self.drain())
 
@@ -20,14 +56,22 @@ class StreamQueue:
         self.is_draining = True
         while not self.queue.empty():
             payload = await self.queue.get()
-            logger.debug(f"Processing: {payload}")
+            self._emit("dequeue", payload, self.queue.qsize())
+            ctx = HandlerContext(payload, self._emit_handler)
             for handler in self.handlers:
+                self._emit("process", payload, handler)
                 try:
-                    await handler({"data": payload})
+                    result = await handler(ctx)
+                    self._emit("result", payload, result, handler)
                 except Exception as e:
                     logger.error(f"Handler error: {e}")
+                    self._emit("error", payload, e, handler)
             self.queue.task_done()
+        self._emit("drain")
         self.is_draining = False
+
+    def length(self) -> int:
+        return self.queue.qsize()
 
 class OBSIntegration:
     def __init__(self, host: str = "localhost", port: int = 4455, password: str = ""):
