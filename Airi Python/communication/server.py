@@ -3,7 +3,7 @@ import time
 import uuid
 import asyncio
 import logging
-from typing import Dict, Set, Optional, Any, List
+from typing import Dict, Set, Optional, Any, List, Callable, Awaitable
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from nanoid import generate
@@ -27,12 +27,16 @@ class AuthenticatedPeer:
         self.websocket = websocket
         self.id = peer_id
         self.authenticated = False
-        self.name: Optional[str] = None
+        self.name: Optional[str] = ""
         self.index: Optional[int] = None
         self.identity: Optional[ModuleIdentity] = None
         self.last_heartbeat_at = time.time()
         self.missed_heartbeats = 0
         self.healthy = True
+
+class RoutingPolicy(BaseModel):
+    allow_plugins: Optional[List[str]] = None
+    deny_plugins: Optional[List[str]] = None
 
 class AiriServer:
     def __init__(self, instance_id: str = None, auth_token: str = ""):
@@ -41,7 +45,15 @@ class AiriServer:
         self.peers: Dict[str, AuthenticatedPeer] = {}
         self.peers_by_module: Dict[str, Dict[Optional[int], AuthenticatedPeer]] = {}
         self.app = FastAPI()
+        self.on_event_callback: Optional[Callable[[Dict[str, Any]], Awaitable[None]]] = None
+        self.routing_policy: Optional[RoutingPolicy] = None
         self.setup_routes()
+
+    def set_on_event_callback(self, callback: Callable[[Dict[str, Any]], Awaitable[None]]):
+        self.on_event_callback = callback
+
+    def set_routing_policy(self, policy: RoutingPolicy):
+        self.routing_policy = policy
 
     def setup_routes(self):
         @self.app.websocket("/ws")
@@ -69,7 +81,6 @@ class AiriServer:
     async def handle_message(self, peer: AuthenticatedPeer, message: str):
         try:
             event_dict = json.loads(message)
-            # Basic validation
             event_type = event_dict.get("type")
             if not event_type:
                 return
@@ -106,12 +117,51 @@ class AiriServer:
                 await self.handle_announce(peer, event_dict)
                 return
 
-            # Default: Broadcast
-            await self.broadcast(event_dict, exclude_peer=peer)
+            if self.on_event_callback:
+                await self.on_event_callback(event_dict)
+
+            # Routing Decision
+            target_ids = self.decide_routing(peer, event_dict)
+            if target_ids is not None:
+                await self.broadcast(event_dict, exclude_peer=peer, target_ids=target_ids)
 
         except Exception as e:
             logger.error(f"Error handling message: {e}")
             await self.send_error(peer, str(e))
+
+    def decide_routing(self, from_peer: AuthenticatedPeer, event: Dict[str, Any]) -> Optional[Set[str]]:
+        # Porting policy-based routing logic
+        if event.get("route", {}).get("bypass"):
+            return None
+
+        destinations = event.get("route", {}).get("destinations")
+        if destinations:
+            targets = set()
+            for d in destinations:
+                if isinstance(d, str):
+                    if d in self.peers:
+                        targets.add(d)
+                    elif d in self.peers_by_module:
+                        for p in self.peers_by_module[d].values():
+                            targets.add(p.id)
+            return targets
+
+        if self.routing_policy:
+            targets = set()
+            for pid, p in self.peers.items():
+                if self.matches_policy(p, self.routing_policy):
+                    targets.add(pid)
+            return targets
+
+        return None # Broadcast to all
+
+    def matches_policy(self, peer: AuthenticatedPeer, policy: RoutingPolicy) -> bool:
+        plugin_id = peer.identity.plugin.id if peer.identity and peer.identity.plugin else ""
+        if policy.allow_plugins and plugin_id not in policy.allow_plugins:
+            return False
+        if policy.deny_plugins and plugin_id in policy.deny_plugins:
+            return False
+        return True
 
     async def handle_announce(self, peer: AuthenticatedPeer, event_dict: Dict[str, Any]):
         data = event_dict["data"]
@@ -218,20 +268,16 @@ class AiriServer:
             if peer.authenticated:
                 await self.send_registry_sync(peer)
 
-    async def broadcast(self, event: Dict[str, Any], exclude_peer: AuthenticatedPeer = None):
+    async def broadcast(self, event: Dict[str, Any], exclude_peer: AuthenticatedPeer = None, target_ids: Set[str] = None):
         payload = json.dumps(event)
-        destinations = event.get("route", {}).get("destinations")
 
-        for peer in list(self.peers.values()):
+        for peer_id, peer in self.peers.items():
             if not peer.authenticated:
                 continue
-            if exclude_peer and peer.id == exclude_peer.id:
+            if exclude_peer and peer_id == exclude_peer.id:
                 continue
-
-            # Basic routing logic: if destinations exist, only send if matched
-            if destinations:
-                if peer.id not in destinations and peer.name not in destinations:
-                    continue
+            if target_ids is not None and peer_id not in target_ids:
+                continue
 
             try:
                 await peer.websocket.send_text(payload)
