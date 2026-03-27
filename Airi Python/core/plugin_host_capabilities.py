@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_plugin_host_capabilities")
+logger = logging.getLogger(__name__)
 
 class PluginHostProviderSummary(BaseModel):
     name: str

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import time
 from nanoid import generate
 
-logger = logging.getLogger("airi_expression")
+logger = logging.getLogger(__name__)
 
 class TTSRequest(BaseModel):
     text: str

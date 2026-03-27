@@ -3,7 +3,7 @@ import time
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_vision_orchestrator")
+logger = logging.getLogger(__name__)
 
 class VisionCapturePayload(BaseModel):
     image_data_url: str = Field(..., alias="imageDataUrl")

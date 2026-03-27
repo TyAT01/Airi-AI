@@ -3,7 +3,7 @@ import asyncio
 from typing import Optional, Callable, List
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_vad")
+logger = logging.getLogger(__name__)
 
 class UseVADOptions(BaseModel):
     threshold: float = 0.6

@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict, Any, Optional, Callable, Awaitable
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_mcp_tool_bridge")
+logger = logging.getLogger(__name__)
 
 class McpToolDescriptor(BaseModel):
     server_name: str

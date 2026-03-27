@@ -4,7 +4,7 @@ import numpy as np
 from typing import Literal, Optional, List, Dict
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_audio")
+logger = logging.getLogger(__name__)
 
 class SpeakingState(BaseModel):
     mouth_open_size: float = 0.0

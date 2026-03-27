@@ -7,7 +7,7 @@ try:
 except ImportError:
     HAS_LIBS = False
 
-logger = logging.getLogger("airi_vision_capture")
+logger = logging.getLogger(__name__)
 
 class ScreenCapture:
     def __init__(self):

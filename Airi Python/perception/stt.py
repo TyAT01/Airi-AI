@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_perception")
+logger = logging.getLogger(__name__)
 
 class STTInterface:
     def __init__(self, provider: str = "web-speech-api"):

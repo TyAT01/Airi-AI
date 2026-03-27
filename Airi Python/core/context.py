@@ -3,7 +3,7 @@ from typing import Dict, List, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from core.utils.event_source import get_event_source_key
 
-logger = logging.getLogger("airi_context")
+logger = logging.getLogger(__name__)
 
 class ContextMessage(BaseModel):
     id: str

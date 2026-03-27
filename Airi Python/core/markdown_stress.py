@@ -5,7 +5,7 @@ import asyncio
 from typing import List, Dict, Any, Optional, Literal, Union, Callable, Awaitable
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_markdown_stress")
+logger = logging.getLogger(__name__)
 
 class TraceEvent(BaseModel):
     tracer_id: str = Field(..., alias="tracerId")

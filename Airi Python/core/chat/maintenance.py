@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_chat_maintenance_store")
+logger = logging.getLogger(__name__)
 
 class ChatMaintenanceStore:
     def __init__(self, chat_session_store, chat_stream_store, chat_context_store, chat_orchestrator_store):

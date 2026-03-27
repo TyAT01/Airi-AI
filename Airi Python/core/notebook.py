@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_notebook")
+logger = logging.getLogger(__name__)
 
 NotebookEntryKind = Literal['note', 'diary', 'focus']
 

@@ -3,21 +3,29 @@ import logging
 from typing import List, Dict, Any, Optional, Literal
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_response_categoriser")
+logger = logging.getLogger(__name__)
 
 class CategorizedSegment(BaseModel):
     category: Literal["speech", "reasoning", "unknown"]
     content: str
-    start_index: int
-    end_index: int
+    start_index: int = Field(..., alias="startIndex")
+    end_index: int = Field(..., alias="endIndex")
     raw: str
-    tag_name: str
+    tag_name: str = Field(..., alias="tagName")
+
+    class Config:
+        populate_by_name = True
+        populate_by_name = True
 
 class CategorizedResponse(BaseModel):
     segments: List[CategorizedSegment]
     speech: str
     reasoning: str
     raw: str
+
+    class Config:
+        populate_by_name = True
+        populate_by_name = True
 
 def categorize_response(response: str) -> CategorizedResponse:
     """

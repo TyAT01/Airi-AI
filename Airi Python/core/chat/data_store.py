@@ -3,7 +3,7 @@ import json
 from typing import List, Dict, Any, Optional, Callable
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_chat_data_store")
+logger = logging.getLogger(__name__)
 
 class ChatDataAccess:
     def __init__(self):

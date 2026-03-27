@@ -3,7 +3,7 @@ import os
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_discord_service")
+logger = logging.getLogger(__name__)
 
 class DiscordService:
     def __init__(self, discord_token: str, airi_url: str):

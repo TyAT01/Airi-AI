@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, Field
 from core.utils.event_source import get_event_source_key
 
-logger = logging.getLogger("airi_chat_context_store")
+logger = logging.getLogger(__name__)
 
 CONTEXT_HISTORY_LIMIT = 400
 

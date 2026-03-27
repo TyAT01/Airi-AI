@@ -13,7 +13,7 @@ from core.consciousness import ConsciousnessStore
 from core.providers import ProvidersStore
 from communication.server import AiriServer
 
-logger = logging.getLogger("airi_context_bridge")
+logger = logging.getLogger(__name__)
 
 class ContextMessage(BaseModel):
     id: str

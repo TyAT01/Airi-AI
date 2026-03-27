@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, Union, Callable, Awaitable
 from pydantic import BaseModel, Field
 from core.providers import ProvidersStore, VoiceInfo
 
-logger = logging.getLogger("airi_speech")
+logger = logging.getLogger(__name__)
 
 class SpeechStore:
     def __init__(self, providers_store: ProvidersStore):

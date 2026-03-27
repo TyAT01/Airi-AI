@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_settings_general")
+logger = logging.getLogger(__name__)
 
 class GeneralSettings:
     def __init__(self):

@@ -6,7 +6,7 @@ import httpx
 from typing import List, Dict, Any, Optional, AsyncIterable
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_openrouter_speech")
+logger = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "https://openrouter.ai/api/v1/"
 DEFAULT_MODEL = "openai/gpt-audio-mini"

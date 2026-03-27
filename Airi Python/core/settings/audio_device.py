@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from core.audio import AudioDeviceManager
 
-logger = logging.getLogger("airi_settings_audio_device")
+logger = logging.getLogger(__name__)
 
 class AudioDeviceSettings:
     def __init__(self, audio_device_manager: AudioDeviceManager):

@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional, Callable
 from pydantic import BaseModel
 from llm.client import LLMClient
 
-logger = logging.getLogger("airi_openai_compatible_builder")
+logger = logging.getLogger(__name__)
 
 def build_openai_compatible_provider(options: Dict[str, Any]):
     provider_id = options.get("id")

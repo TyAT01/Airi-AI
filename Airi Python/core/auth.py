@@ -3,7 +3,7 @@ import asyncio
 from typing import Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_auth")
+logger = logging.getLogger(__name__)
 
 class User(BaseModel):
     id: str

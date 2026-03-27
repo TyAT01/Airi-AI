@@ -6,7 +6,7 @@ from nanoid import generate
 
 from schemas.protocol import ModuleIdentity, PluginIdentity
 
-logger = logging.getLogger("airi_plugin_host")
+logger = logging.getLogger(__name__)
 
 class PluginSessionPhase(str, Literal):
     LOADING = "loading"

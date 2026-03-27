@@ -3,7 +3,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_chat_stream_store")
+logger = logging.getLogger(__name__)
 
 class ChatSlice(BaseModel):
     type: str = "text"

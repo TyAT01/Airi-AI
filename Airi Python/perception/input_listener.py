@@ -1,7 +1,7 @@
 import logging
 from typing import Callable, Optional
 
-logger = logging.getLogger("airi_input_listener")
+logger = logging.getLogger(__name__)
 
 class InputListener:
     def __init__(self):

@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any
 from core.configurator import Configurator
 
-logger = logging.getLogger("airi_settings_twitter")
+logger = logging.getLogger(__name__)
 
 class TwitterSettings:
     def __init__(self, configurator: Configurator):

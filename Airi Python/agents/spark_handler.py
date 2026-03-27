@@ -9,7 +9,7 @@ from schemas.protocol import SparkNotifyEvent, SparkCommandEvent, SparkCommandGu
 from llm.client import LLMClient
 from core.character import CharacterState
 
-logger = logging.getLogger("airi_spark_handler")
+logger = logging.getLogger(__name__)
 
 class SparkCommandDraftPersona(BaseModel):
     strength: Literal['very-high', 'high', 'medium', 'low', 'very-low']

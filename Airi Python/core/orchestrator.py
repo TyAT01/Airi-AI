@@ -12,7 +12,7 @@ from llm.client import LLMClient
 from schemas.protocol import SparkNotifyEvent, SparkCommandEvent
 from agents.spark_handler import SparkNotifyAgent
 
-logger = logging.getLogger("airi_orchestrator")
+logger = logging.getLogger(__name__)
 
 class CharacterOrchestrator:
     """

@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from core.providers import ProvidersStore
 
-logger = logging.getLogger("airi_consciousness")
+logger = logging.getLogger(__name__)
 
 class ConsciousnessStore:
     def __init__(self, providers_store: ProvidersStore):

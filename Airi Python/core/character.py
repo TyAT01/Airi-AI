@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_character")
+logger = logging.getLogger(__name__)
 
 class CharacterReaction(BaseModel):
     id: str = Field(default_factory=generate)

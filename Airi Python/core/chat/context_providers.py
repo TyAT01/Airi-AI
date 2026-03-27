@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_chat_context_providers_datetime")
+logger = logging.getLogger(__name__)
 
 def create_datetime_context() -> Dict[str, Any]:
     import time

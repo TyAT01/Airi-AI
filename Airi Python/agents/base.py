@@ -5,7 +5,7 @@ from nanoid import generate
 
 from schemas.protocol import SparkNotifyEvent, SparkCommandEvent
 
-logger = logging.getLogger("airi_agent")
+logger = logging.getLogger(__name__)
 
 class BaseAgent:
     def __init__(self, agent_id: str, name: str):

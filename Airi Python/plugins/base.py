@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from abc import ABC, abstractmethod
 
-logger = logging.getLogger("airi_plugins")
+logger = logging.getLogger(__name__)
 
 class AiriPlugin(ABC):
     def __init__(self, plugin_id: str, name: str, context: Optional[Dict[str, Any]] = None):

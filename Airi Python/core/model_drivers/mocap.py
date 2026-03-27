@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict, Any, List, Optional, Callable
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_mocap")
+logger = logging.getLogger(__name__)
 
 class MocapConfig(BaseModel):
     enabled: Dict[str, bool] = {"pose": True, "hands": True, "face": True}

@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, List, Dict, Any
 
-logger = logging.getLogger("airi_discord")
+logger = logging.getLogger(__name__)
 
 class DiscordIntegration:
     def __init__(self, token: str):

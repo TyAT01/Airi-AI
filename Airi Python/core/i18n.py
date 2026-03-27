@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Dict, Any, Optional
 
-logger = logging.getLogger("airi_i18n")
+logger = logging.getLogger(__name__)
 
 class I18nManager:
     def __init__(self, default_locale: str = "en"):

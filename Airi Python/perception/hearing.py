@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, Union, Callable, Awaitable
 from pydantic import BaseModel, Field
 from core.providers import ProvidersStore
 
-logger = logging.getLogger("airi_hearing")
+logger = logging.getLogger(__name__)
 
 class StreamTranscriptionOptions(BaseModel):
     language: Optional[str] = None

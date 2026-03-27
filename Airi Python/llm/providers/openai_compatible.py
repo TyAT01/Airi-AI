@@ -3,7 +3,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from openai import AsyncOpenAI
 
-logger = logging.getLogger("airi_openai_compatible")
+logger = logging.getLogger(__name__)
 
 class OpenAICompatibleProvider:
     def __init__(self, api_key: str, base_url: str):
