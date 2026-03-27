@@ -11,15 +11,15 @@ from expression.speech import SpeechStore
 logger = logging.getLogger("airi_card_store")
 
 class AiriExtensionModules(BaseModel):
-    consciousness: Dict[str, str] = {"provider": "", "model": ""}
-    speech: Dict[str, Any] = {"provider": "", "model": "", "voice_id": ""}
+    consciousness: Dict[str, str] = Field(default_factory=lambda: {"provider": "", "model": ""})
+    speech: Dict[str, Any] = Field(default_factory=lambda: {"provider": "", "model": "", "voice_id": ""})
     vrm: Optional[Dict[str, str]] = None
     live2d: Optional[Dict[str, str]] = None
     display_model_id: Optional[str] = Field(None, alias="displayModelId")
 
 class AiriExtension(BaseModel):
     modules: AiriExtensionModules
-    agents: Dict[str, Any] = {}
+    agents: Dict[str, Any] = Field(default_factory=dict)
 
 class AiriCard(BaseModel):
     name: str
@@ -32,12 +32,15 @@ class AiriCard(BaseModel):
     system_prompt: str = Field("", alias="systemPrompt")
     greetings: List[str] = []
     tags: List[str] = []
-    extensions: Dict[str, Any] = {}
+    extensions: Dict[str, Any] = Field(default_factory=dict)
 
     @property
     def airi_extension(self) -> Optional[AiriExtension]:
         if "airi" in self.extensions:
-            return AiriExtension(**self.extensions["airi"])
+            try:
+                return AiriExtension(**self.extensions["airi"])
+            except Exception:
+                return None
         return None
 
 class AiriCardStore:
@@ -64,8 +67,59 @@ class AiriCardStore:
     def get_active_card(self) -> Optional[AiriCard]:
         return self.cards.get(self.active_card_id)
 
+    def resolve_airi_extension(self, card_data: Dict[str, Any]) -> AiriExtension:
+        # Get existing extension if available
+        existing_extension = card_data.get("extensions", {}).get("airi", {})
+
+        # Create default modules config
+        default_modules = {
+            "consciousness": {
+                "provider": self.consciousness_store.active_provider,
+                "model": self.consciousness_store.active_model,
+            },
+            "speech": {
+                "provider": self.speech_store.active_provider,
+                "model": self.speech_store.active_model,
+                "voice_id": self.speech_store.active_voice_id,
+            },
+            "displayModelId": self.stage_model_store.stage_model_selected,
+        }
+
+        # Merge existing extension with defaults
+        modules = existing_extension.get("modules", {})
+        merged_modules = {
+            "consciousness": {
+                "provider": modules.get("consciousness", {}).get("provider") or default_modules["consciousness"]["provider"],
+                "model": modules.get("consciousness", {}).get("model") or default_modules["consciousness"]["model"],
+            },
+            "speech": {
+                "provider": modules.get("speech", {}).get("provider") or default_modules["speech"]["provider"],
+                "model": modules.get("speech", {}).get("model") or default_modules["speech"]["model"],
+                "voice_id": modules.get("speech", {}).get("voice_id") or default_modules["speech"]["voice_id"],
+                "pitch": modules.get("speech", {}).get("pitch"),
+                "rate": modules.get("speech", {}).get("rate"),
+                "ssml": modules.get("speech", {}).get("ssml"),
+                "language": modules.get("speech", {}).get("language"),
+            },
+            "vrm": modules.get("vrm"),
+            "live2d": modules.get("live2d"),
+            "displayModelId": modules.get("displayModelId") or default_modules["displayModelId"],
+        }
+
+        return AiriExtension(
+            modules=AiriExtensionModules(**merged_modules),
+            agents=existing_extension.get("agents", {})
+        )
+
     def add_card(self, card_data: Dict[str, Any]) -> str:
         card_id = generate()
+
+        # Ensure airi extension is resolved/merged
+        extension = self.resolve_airi_extension(card_data)
+        if "extensions" not in card_data:
+            card_data["extensions"] = {}
+        card_data["extensions"]["airi"] = extension.dict(by_alias=True)
+
         card = AiriCard(**card_data)
         self.cards[card_id] = card
         return card_id
@@ -107,6 +161,21 @@ class AiriCardStore:
 
         if ext.modules.display_model_id:
             self.stage_model_store.stage_model_selected = ext.modules.display_model_id
+
+    @property
+    def current_models(self) -> Dict[str, Any]:
+        return {
+            "consciousness": {
+                "provider": self.consciousness_store.active_provider,
+                "model": self.consciousness_store.active_model,
+            },
+            "speech": {
+                "provider": self.speech_store.active_provider,
+                "model": self.speech_store.active_model,
+                "voice_id": self.speech_store.active_voice_id,
+            },
+            "displayModelId": self.stage_model_store.stage_model_selected,
+        }
 
     @property
     def system_prompt(self) -> str:

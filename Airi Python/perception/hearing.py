@@ -25,11 +25,38 @@ class HearingStore:
         self.modelLoadError: Dict[str, Optional[str]] = {}
 
     @property
+    def supports_model_listing(self) -> bool:
+        # In TS: providersStore.getProviderMetadata(activeTranscriptionProvider.value)?.capabilities.listModels !== undefined
+        # For now, we assume all providers support it if they are configured
+        return True
+
+    @property
+    def provider_models(self) -> List[Any]:
+        return self.providers_store.get_models_for_provider(self.active_transcription_provider)
+
+    @property
+    def is_loading_active_provider_models(self) -> bool:
+        state = self.providers_store.provider_runtime_state.get(self.active_transcription_provider)
+        return state.is_loading_models if state else False
+
+    @property
+    def active_provider_model_error(self) -> Optional[str]:
+        state = self.providers_store.provider_runtime_state.get(self.active_transcription_provider)
+        return state.model_load_error if state else None
+
+    @property
     def configured(self) -> bool:
         if not self.active_transcription_provider:
             return False
         if self.active_transcription_provider == 'browser-web-speech-api':
             return True
+
+        # For OpenAI Compatible providers, check provider config as fallback
+        if self.active_transcription_provider == 'openai-compatible-audio-transcription':
+            provider_config = self.providers_store.get_provider_config(self.active_transcription_provider)
+            if provider_config.get('model'):
+                return True
+
         return bool(self.active_transcription_model)
 
     async def load_models_for_provider(self, provider: str):
