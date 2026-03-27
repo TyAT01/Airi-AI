@@ -2,6 +2,7 @@ from typing import List, Optional, Dict, Any, Union, Literal
 from pydantic import BaseModel, Field
 from enum import Enum
 import time
+from nanoid import generate
 
 class MessageHeartbeatKind(str, Enum):
     PING = "ping"
@@ -17,6 +18,40 @@ class ModuleIdentity(BaseModel):
     kind: Literal["plugin"]
     plugin: PluginIdentity
     labels: Optional[Dict[str, str]] = None
+
+class EventPriority(str, Enum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    NORMAL = "normal"
+    LOW = "low"
+
+class EventEnvelope(BaseModel):
+    id: str = Field(default_factory=generate)
+    type: str
+    time: float = Field(default_factory=lambda: time.time() * 1000)
+    priority: Optional[EventPriority] = None
+    source: Optional[str] = None
+    tags: Optional[List[str]] = None
+    payload: Any
+
+def create_event(
+    event_type: str,
+    payload: Any,
+    priority: Optional[EventPriority] = None,
+    source: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    event_id: Optional[str] = None,
+    event_time: Optional[float] = None
+) -> EventEnvelope:
+    return EventEnvelope(
+        id=event_id or generate(),
+        type=event_type,
+        time=event_time or time.time() * 1000,
+        priority=priority,
+        source=source,
+        tags=tags,
+        payload=payload
+    )
 
 class EventBaseMetadata(BaseModel):
     source: Optional[ModuleIdentity] = None

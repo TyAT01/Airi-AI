@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Optional
 from pydantic import BaseModel
 
@@ -6,7 +7,7 @@ logger = logging.getLogger("airi_auth")
 
 class User(BaseModel):
     id: str
-    email: str
+    email: Optional[str] = None
     name: Optional[str] = None
     image: Optional[str] = None
 
@@ -33,10 +34,16 @@ class AuthStore:
     async def initialize(self):
         if self.initialized:
             return
+
         logger.info("Initializing authentication state")
-        # In a real Python app, we might check an OAuth session or similar
+        await self.fetch_session()
         self.initialized = True
 
     async def fetch_session(self):
-        # Implementation to refresh or fetch the current session
-        pass
+        # In a real Python app, we might check an OAuth session or similar
+        # For now, it's a placeholder as in the original TS code (which just catches any errors)
+        try:
+            # Refresh or fetch the current session
+            pass
+        except Exception as e:
+            logger.error(f"Failed to fetch session: {e}")
