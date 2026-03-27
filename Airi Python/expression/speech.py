@@ -24,6 +24,42 @@ class SpeechStore:
         self.model_search_query: str = ""
 
     @property
+    def supports_ssml(self) -> bool:
+        # Currently only ElevenLabs and some other providers support SSML
+        # only part voices are support SSML in cosyvoice-v2 which is provided by alibaba
+        if self.active_speech_provider == 'alibaba-cloud-model-studio' and self.active_speech_model == 'cosyvoice-v2':
+            return True
+        return self.active_speech_provider in ['elevenlabs', 'microsoft-speech', 'azure-speech']
+
+    @property
+    def supports_model_listing(self) -> bool:
+        # Placeholder logic
+        return True
+
+    @property
+    def provider_models(self) -> List[Any]:
+        return self.providers_store.get_models_for_provider(self.active_speech_provider)
+
+    @property
+    def is_loading_active_provider_models(self) -> bool:
+        state = self.providers_store.provider_runtime_state.get(self.active_speech_provider)
+        return state.is_loading_models if state else False
+
+    @property
+    def active_provider_model_error(self) -> Optional[str]:
+        state = self.providers_store.provider_runtime_state.get(self.active_speech_provider)
+        return state.model_load_error if state else None
+
+    @property
+    def filtered_models(self) -> List[Any]:
+        models = self.provider_models
+        if not self.model_search_query.strip():
+            return models
+        query = self.model_search_query.lower().strip()
+        # Basic filtering logic
+        return [m for m in models if query in m.name.lower() or query in m.id.lower()]
+
+    @property
     def configured(self) -> bool:
         if self.active_speech_provider == "speech-noop":
             return False

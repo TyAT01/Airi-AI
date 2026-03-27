@@ -24,6 +24,24 @@ class CharacterState:
             self.reactions.pop(0)
         return reaction
 
+    def on_spark_notify_reaction_stream_event(self, spark_event_id: str, chunk: str, metadata: Dict[str, Any] = None):
+        # In Python we can just update the reaction directly or handle streaming state
+        # Find if there is an existing reaction for this event
+        existing = next((r for r in self.reactions if r.source_event_id == spark_event_id), None)
+        if existing:
+            existing.message += chunk
+        else:
+            self.record_reaction(message=chunk, source_event_id=spark_event_id, metadata=metadata)
+
+    def on_spark_notify_reaction_stream_end(self, spark_event_id: str, full_text: str, metadata: Dict[str, Any] = None):
+        existing = next((r for r in self.reactions if r.source_event_id == spark_event_id), None)
+        if existing:
+            existing.message = full_text
+            if metadata:
+                existing.metadata = metadata
+        else:
+            self.record_reaction(message=full_text, source_event_id=spark_event_id, metadata=metadata)
+
     def clear_reactions(self):
         self.reactions = []
 
