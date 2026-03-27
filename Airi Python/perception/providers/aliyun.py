@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict, Any, Optional, Callable, Awaitable
 import websockets
 
-logger = logging.getLogger("airi_aliyun")
+logger = logging.getLogger(__name__)
 
 class AliyunTranscriptionProvider:
     def __init__(self, access_key_id: str, access_key_secret: str, app_key: str):

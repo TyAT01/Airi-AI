@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, Callable, Awaitable, TypeVar, Gene
 
 T = TypeVar('T')
 
-logger = logging.getLogger("airi_stream_kit")
+logger = logging.getLogger(__name__)
 
 class HandlerContext(Generic[T]):
     def __init__(self, data: T, emit_cb: Callable[[str, Any], None]):

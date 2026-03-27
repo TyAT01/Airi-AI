@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_telegram_service")
+logger = logging.getLogger(__name__)
 
 class TelegramService:
     def __init__(self, bot_token: str):

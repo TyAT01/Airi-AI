@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_converters")
+logger = logging.getLogger(__name__)
 
 class ModelInfo(BaseModel):
     id: str
@@ -10,19 +10,25 @@ class ModelInfo(BaseModel):
     provider: str
     description: Optional[str] = None
     capabilities: Optional[List[str]] = None
-    contextLength: Optional[int] = 0
+    contextLength: Optional[int] = Field(0, alias="contextLength")
     deprecated: Optional[bool] = False
+
+    class Config:
+        populate_by_name = True
 
 class VoiceInfo(BaseModel):
     id: str
     name: str
     provider: str
-    compatibleModels: Optional[List[str]] = None
+    compatibleModels: Optional[List[str]] = Field(None, alias="compatibleModels")
     description: Optional[str] = None
     gender: Optional[str] = None
     deprecated: Optional[bool] = False
-    previewURL: Optional[str] = None
+    previewURL: Optional[str] = Field(None, alias="previewURL")
     languages: List[Dict[str, str]] = []
+
+    class Config:
+        populate_by_name = True
 
 def convert_provider_definitions_to_metadata(definitions: List[Dict[str, Any]], t: Any, metadata: Dict[str, Any]) -> Dict[str, Any]:
     # Placeholder for converting provider definitions to metadata

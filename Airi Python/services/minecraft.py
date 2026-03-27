@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import List, Optional
 
-logger = logging.getLogger("airi_minecraft_service")
+logger = logging.getLogger(__name__)
 
 class MinecraftService:
     def __init__(self, username: str, host: str, port: int = 25565):

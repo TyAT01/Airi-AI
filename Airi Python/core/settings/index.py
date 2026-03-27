@@ -11,7 +11,7 @@ from core.settings.twitter import TwitterSettings
 from core.display_models import DisplayModelsStore
 from core.configurator import Configurator
 
-logger = logging.getLogger("airi_settings_index")
+logger = logging.getLogger(__name__)
 
 class UnifiedSettings:
     def __init__(self, display_models_store: DisplayModelsStore, configurator: Configurator):

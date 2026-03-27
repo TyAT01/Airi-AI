@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_vision_agents")
+logger = logging.getLogger(__name__)
 
 class VisionAgentConfig(BaseModel):
     id: str

@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_memory")
+logger = logging.getLogger(__name__)
 
 class MemoryEntry(BaseModel):
     id: str = Field(default_factory=generate)

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-logger = logging.getLogger("airi_api_server")
+logger = logging.getLogger(__name__)
 
 class AiriAPIServer:
     def __init__(self):

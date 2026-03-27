@@ -3,7 +3,7 @@ import sqlite3
 import json
 from typing import List, Dict, Any, Optional
 
-logger = logging.getLogger("airi_database")
+logger = logging.getLogger(__name__)
 
 class AiriDatabase:
     def __init__(self, db_path: str = "airi.db"):

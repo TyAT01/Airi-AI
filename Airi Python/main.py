@@ -8,10 +8,11 @@ from communication.server import AiriServer
 from core.character import CharacterState
 from core.notebook import CharacterNotebook
 from core.orchestrator import CharacterOrchestrator
-from core.character_cards import CharacterCardManager
+from core.airi_card import AiriCardStore
 from core.memory import MemorySystem
+from core.providers import ProvidersStore
 from llm.client import LLMClient
-from perception.hearing import HearingStore, VisionStore
+from perception.hearing import HearingStore
 from expression.speech import SpeechPipeline
 from agents.gaming import MinecraftModule, FactorioModule
 from plugins.base import PluginManager
@@ -28,7 +29,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger("airi_main")
+logger = logging.getLogger(__name__)
 
 async def main():
     # Load configuration
@@ -42,6 +43,23 @@ async def main():
     memory = MemorySystem()
     llm = LLMClient(api_key=api_key)
     speech = SpeechPipeline()
+
+    # Initialize more stores for UnifiedSettings
+    providers_store = ProvidersStore()
+    from core.settings.stage_model import StageModelSettings
+    from core.display_models import DisplayModelsStore
+    from core.configurator import Configurator
+    from core.consciousness import ConsciousnessStore
+    from expression.speech import SpeechStore
+
+    display_models_store = DisplayModelsStore()
+    stage_model_settings = StageModelSettings(display_models_store)
+
+    airi_card_store = AiriCardStore(
+        consciousness_store=ConsciousnessStore(providers_store),
+        speech_store=SpeechStore(providers_store),
+        stage_model_settings=stage_model_settings
+    )
 
     orchestrator = CharacterOrchestrator(
         character=character,

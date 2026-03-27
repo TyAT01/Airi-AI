@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_live2d")
+logger = logging.getLogger(__name__)
 
 class Live2dModelConfig(BaseModel):
     model_id: str = Field(..., alias="modelId")

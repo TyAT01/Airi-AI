@@ -20,7 +20,7 @@ from schemas.protocol import (
 )
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("airi_server")
+logger = logging.getLogger(__name__)
 
 class AuthenticatedPeer:
     def __init__(self, websocket: WebSocket, peer_id: str):

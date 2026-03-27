@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_satori_service")
+logger = logging.getLogger(__name__)
 
 class SatoriService:
     def __init__(self, ws_url: str, token: str):

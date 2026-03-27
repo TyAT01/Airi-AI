@@ -2,7 +2,7 @@ import logging
 import time
 from typing import Dict, Any, List
 
-logger = logging.getLogger("airi_websocket_inspector")
+logger = logging.getLogger(__name__)
 
 class WebSocketMessage(Dict):
     pass

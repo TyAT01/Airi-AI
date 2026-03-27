@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, List, Dict, Any
 
-logger = logging.getLogger("airi_twitter")
+logger = logging.getLogger(__name__)
 
 class TwitterIntegration:
     def __init__(self, api_key: str, api_secret: str):

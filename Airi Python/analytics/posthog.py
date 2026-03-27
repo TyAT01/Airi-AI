@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 
-logger = logging.getLogger("airi_posthog")
+logger = logging.getLogger(__name__)
 
 # Simplified PostHog for Python port
 class PostHogMock:

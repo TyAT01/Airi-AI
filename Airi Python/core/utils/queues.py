@@ -5,7 +5,7 @@ import logging
 from typing import Dict, Any, List, Optional, Callable, Awaitable
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_queues")
+logger = logging.getLogger(__name__)
 
 class EmotionPayload(BaseModel):
     name: str

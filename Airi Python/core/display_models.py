@@ -5,7 +5,7 @@ from typing import List, Optional, Union, Literal
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_display_models")
+logger = logging.getLogger(__name__)
 
 class DisplayModelFormat(str, Enum):
     Live2dZip = 'live2d-zip'

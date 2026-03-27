@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any
 from core.configurator import Configurator
 
-logger = logging.getLogger("airi_settings_discord")
+logger = logging.getLogger(__name__)
 
 class DiscordSettings:
     def __init__(self, configurator: Configurator):

@@ -2,7 +2,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any, Optional, Callable, Awaitable
 
-logger = logging.getLogger("airi_chat_hooks")
+logger = logging.getLogger(__name__)
 
 class ChatHooks:
     def __init__(self):

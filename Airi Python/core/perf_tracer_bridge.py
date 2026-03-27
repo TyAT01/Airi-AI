@@ -4,7 +4,7 @@ import time
 from typing import List, Dict, Any, Optional, Literal, Set, Union, Callable
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("airi_perf_tracer_bridge")
+logger = logging.getLogger(__name__)
 
 class TraceEvent(BaseModel):
     tracer_id: str = Field(..., alias="tracerId")

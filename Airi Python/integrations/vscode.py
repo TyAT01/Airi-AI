@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Optional
 
-logger = logging.getLogger("airi_vscode_integration")
+logger = logging.getLogger(__name__)
 
 class VSCodeIntegration:
     def __init__(self, port: int = 3000):

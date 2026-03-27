@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Dict, Any
 
-logger = logging.getLogger("airi_speech_runtime")
+logger = logging.getLogger(__name__)
 
 class SpeechIntent:
     def __init__(self, intent_id: str):

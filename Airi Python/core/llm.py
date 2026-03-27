@@ -3,7 +3,7 @@ import re
 from typing import List, Dict, Any, Optional, Callable, Awaitable
 from llm.client import LLMClient
 
-logger = logging.getLogger("airi_core_llm")
+logger = logging.getLogger(__name__)
 
 # Runtime auto-degrade: patterns that indicate the model/provider does not support tool calling.
 TOOLS_RELATED_ERROR_PATTERNS = [

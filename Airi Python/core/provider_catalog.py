@@ -1,39 +1,26 @@
 import logging
 import json
 import os
-from typing import List, Dict, Any, Optional, Literal
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_provider_catalog")
+logger = logging.getLogger(__name__)
 
-class ModelInfo(BaseModel):
+class ProviderCatalogProvider(BaseModel):
     id: str
+    definitionId: str
     name: str
-    provider: str
-    description: Optional[str] = None
-    context_length: int = Field(0, alias="contextLength")
-    deprecated: bool = False
+    config: Dict[str, Any] = Field(default_factory=dict)
+    validated: bool = False
+    validationBypassed: bool = Field(False, alias="validationBypassed")
 
-class ProviderMetadata(BaseModel):
-    id: str
-    name: str
-    category: Literal["chat", "embed", "speech", "transcription"]
-    tasks: List[str]
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    default_options: Dict[str, Any] = Field(default_factory=dict, alias="defaultOptions")
+    class Config:
+        populate_by_name = True
 
-class ProviderRuntimeState(BaseModel):
-    is_configured: bool = Field(False, alias="isConfigured")
-    models: List[ModelInfo] = []
-    is_loading_models: bool = Field(False, alias="isLoadingModels")
-    model_load_error: Optional[str] = Field(None, alias="modelLoadError")
-
-class ProviderCatalog:
-    def __init__(self, persistence_file: str = "provider_configs.json"):
-        self.credentials: Dict[str, Dict[str, Any]] = {}
-        self.runtime_states: Dict[str, ProviderRuntimeState] = {}
+class ProviderCatalogStore:
+    def __init__(self, persistence_file: str = "settings/provider_catalog.json"):
+        self.configs: Dict[str, ProviderCatalogProvider] = {}
         self.persistence_file = persistence_file
         self._load_from_persistence()
 
@@ -42,38 +29,62 @@ class ProviderCatalog:
             try:
                 with open(self.persistence_file, "r") as f:
                     data = json.load(f)
-                    self.credentials = data.get("credentials", {})
-                    states_data = data.get("runtime_states", {})
-                    for pid, sdata in states_data.items():
-                        self.runtime_states[pid] = ProviderRuntimeState(**sdata)
-                logger.info(f"Loaded {len(self.credentials)} provider configurations.")
+                    for pid, config_data in data.items():
+                        self.configs[pid] = ProviderCatalogProvider(**config_data)
+                logger.info(f"Loaded {len(self.configs)} provider configurations from catalog.")
             except Exception as e:
-                logger.error(f"Failed to load provider persistence: {e}")
+                logger.error(f"Failed to load provider catalog persistence: {e}")
 
     def _save_to_persistence(self):
+        os.makedirs(os.path.dirname(self.persistence_file), exist_ok=True)
         try:
             with open(self.persistence_file, "w") as f:
-                data = {
-                    "credentials": self.credentials,
-                    "runtime_states": {pid: s.dict(by_alias=True) for pid, s in self.runtime_states.items()}
-                }
+                data = {pid: config.dict(by_alias=True) for pid, config in self.configs.items()}
                 json.dump(data, f, indent=2)
-            logger.info("Saved provider configurations.")
+            logger.info("Saved provider catalog configurations.")
         except Exception as e:
-            logger.error(f"Failed to save provider persistence: {e}")
+            logger.error(f"Failed to save provider catalog persistence: {e}")
 
-    def get_provider_config(self, provider_id: str) -> Dict[str, Any]:
-        return self.credentials.get(provider_id, {})
+    async def fetch_list(self):
+        """
+        In TS, this handles local-first request with remote sync.
+        For Python, we focus on local persistence for now.
+        """
+        self._load_from_persistence()
+        return list(self.configs.values())
 
-    def set_provider_config(self, provider_id: str, config: Dict[str, Any]):
-        self.credentials[provider_id] = config
+    async def add_provider(self, definition_id: str, name: str, initial_config: Dict[str, Any] = {}):
+        provider_id = generate()
+        provider = ProviderCatalogProvider(
+            id=provider_id,
+            definitionId=definition_id,
+            name=name,
+            config=initial_config,
+            validated=False,
+            validationBypassed=False
+        )
+        self.configs[provider_id] = provider
         self._save_to_persistence()
+        return provider
 
-    def update_runtime_state(self, provider_id: str, updates: Dict[str, Any]):
-        if provider_id not in self.runtime_states:
-            self.runtime_states[provider_id] = ProviderRuntimeState()
+    async def remove_provider(self, provider_id: str):
+        if provider_id in self.configs:
+            del self.configs[provider_id]
+            self._save_to_persistence()
 
-        state_dict = self.runtime_states[provider_id].dict()
-        state_dict.update(updates)
-        self.runtime_states[provider_id] = ProviderRuntimeState(**state_dict)
+    async def commit_provider_config(
+        self,
+        provider_id: str,
+        new_config: Dict[str, Any],
+        validated: bool,
+        validation_bypassed: bool
+    ):
+        provider = self.configs.get(provider_id)
+        if not provider:
+            return None
+
+        provider.config = new_config
+        provider.validated = validated
+        provider.validationBypassed = validation_bypassed
         self._save_to_persistence()
+        return provider

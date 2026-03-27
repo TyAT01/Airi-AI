@@ -4,7 +4,7 @@ import time
 from typing import List, Dict, Any, Optional, Callable, Awaitable
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_vision_processing")
+logger = logging.getLogger(__name__)
 
 class VisionTickOutcome(BaseModel):
     captured_at: Optional[float] = None

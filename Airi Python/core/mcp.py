@@ -2,7 +2,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any, Optional
 
-logger = logging.getLogger("airi_mcp")
+logger = logging.getLogger(__name__)
 
 class MCPClient:
     def __init__(self, server_url: str):

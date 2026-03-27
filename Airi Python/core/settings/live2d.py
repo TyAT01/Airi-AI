@@ -1,7 +1,7 @@
 import logging
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_settings_live2d")
+logger = logging.getLogger(__name__)
 
 class Live2dSettings:
     def __init__(self):

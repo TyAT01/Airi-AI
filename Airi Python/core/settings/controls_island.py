@@ -2,7 +2,7 @@ import logging
 from typing import Literal
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_settings_controls_island")
+logger = logging.getLogger(__name__)
 
 class ControlsIslandSettings:
     def __init__(self):

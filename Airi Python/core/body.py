@@ -4,7 +4,7 @@ import random
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_body")
+logger = logging.getLogger(__name__)
 
 class BodyState(BaseModel):
     blink: bool = False

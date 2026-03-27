@@ -3,7 +3,7 @@ import asyncio
 import io
 from typing import Dict, Any, Optional, Callable, Awaitable
 
-logger = logging.getLogger("airi_audio_file_utils")
+logger = logging.getLogger(__name__)
 
 class AudioFileProcessor:
     """

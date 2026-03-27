@@ -3,7 +3,7 @@ from typing import Optional, Literal
 from pydantic import BaseModel
 from core.display_models import DisplayModel, DisplayModelsStore
 
-logger = logging.getLogger("airi_settings_stage_model")
+logger = logging.getLogger(__name__)
 
 StageModelRenderer = Literal['live2d', 'vrm', 'disabled']
 

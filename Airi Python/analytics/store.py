@@ -7,7 +7,7 @@ from analytics.posthog import (
     register_posthog_build_info
 )
 
-logger = logging.getLogger("airi_analytics_store")
+logger = logging.getLogger(__name__)
 
 class SharedAnalyticsStore:
     def __init__(self, settings_analytics=None, build_info: Optional[Dict[str, Any]] = None):

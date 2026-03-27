@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_settings_theme")
+logger = logging.getLogger(__name__)
 
 DEFAULT_THEME_COLORS_HUE = 220.44
 

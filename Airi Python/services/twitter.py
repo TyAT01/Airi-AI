@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Optional
 
-logger = logging.getLogger("airi_twitter_service")
+logger = logging.getLogger(__name__)
 
 class TwitterService:
     def __init__(self, username: str, password: str):

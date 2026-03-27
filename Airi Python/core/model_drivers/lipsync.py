@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_lipsync")
+logger = logging.getLogger(__name__)
 
 class LipSyncConfig(BaseModel):
     cap: float = 0.7

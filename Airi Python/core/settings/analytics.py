@@ -1,7 +1,7 @@
 import logging
 from pydantic import BaseModel
 
-logger = logging.getLogger("airi_settings_analytics")
+logger = logging.getLogger(__name__)
 
 class AnalyticsSettings:
     def __init__(self):

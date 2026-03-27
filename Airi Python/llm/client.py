@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Any, Optional, Callable, Awaitable
 from openai import AsyncOpenAI
 
-logger = logging.getLogger("airi_llm")
+logger = logging.getLogger(__name__)
 
 class LLMClient:
     def __init__(self, api_key: str, base_url: str = None):

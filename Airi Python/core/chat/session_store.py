@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional, Set
 from pydantic import BaseModel, Field
 from nanoid import generate
 
-logger = logging.getLogger("airi_chat_session_store")
+logger = logging.getLogger(__name__)
 
 class ChatHistoryItem(BaseModel):
     id: str = Field(default_factory=generate)

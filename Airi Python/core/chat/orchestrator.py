@@ -16,7 +16,7 @@ from core.utils.llm_marker_parser import LLMMarkerParser
 from core.utils.response_categoriser import StreamingCategorizer, categorize_response
 from llm.client import LLMClient
 
-logger = logging.getLogger("airi_chat_orchestrator")
+logger = logging.getLogger(__name__)
 
 class QueuedSend(BaseModel):
     id: str = Field(default_factory=generate)

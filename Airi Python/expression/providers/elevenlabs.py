@@ -2,7 +2,7 @@ import httpx
 import logging
 from typing import List, Dict, Any, Optional
 
-logger = logging.getLogger("airi_elevenlabs")
+logger = logging.getLogger(__name__)
 
 class ElevenLabsProvider:
     def __init__(self, api_key: str):
