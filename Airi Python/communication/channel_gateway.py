@@ -2,14 +2,9 @@ import asyncio
 import logging
 from typing import List, Dict, Any, Optional, Callable, Set, Union
 from dataclasses import dataclass, field
+from schemas.protocol import EventEnvelope as GatewayEvent
 
 logger = logging.getLogger("airi_channel_gateway")
-
-@dataclass
-class GatewayEvent:
-    type: str
-    data: Any
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
 class GatewayChannel:
     def __init__(

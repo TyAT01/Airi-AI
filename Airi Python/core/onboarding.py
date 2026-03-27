@@ -26,7 +26,8 @@ class OnboardingStore:
             return False
         for pid in CREDENTIAL_BASED_ESSENTIAL_PROVIDER_IDS:
             config = self.providers_store.providers.get(pid, {})
-            if config.get("apiKey", "").strip():
+            api_key = config.get("apiKey", "")
+            if isinstance(api_key, str) and api_key.strip():
                 return True
         return False
 
