@@ -3,7 +3,7 @@ import json
 import logging
 from nanoid import generate
 
-from core.character import CharacterState
+from core.character import CharacterStore as CharacterState
 from core.notebook import CharacterNotebook
 from core.orchestrator import CharacterOrchestrator
 from core.memory import MemorySystem, EmbeddingClient

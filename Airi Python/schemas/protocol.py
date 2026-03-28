@@ -48,6 +48,10 @@ def create_event(
     event_id: Optional[str] = None,
     event_time: Optional[float] = None
 ) -> EventEnvelope:
+    """
+    Creates an event envelope.
+    Mimics createEvent in packages/stage-ui/src/stores/mods/api/events.ts.
+    """
     return EventEnvelope(
         id=event_id or generate(),
         type=event_type,
@@ -59,6 +63,10 @@ def create_event(
     )
 
 class EventStream(Generic[TPayload]):
+    """
+    Async stream for events.
+    Mimics createEventStream in packages/stage-ui/src/stores/mods/api/events.ts.
+    """
     def __init__(self, queue: Optional[asyncio.Queue] = None):
         self.queue = queue or asyncio.Queue()
         self.closed = False

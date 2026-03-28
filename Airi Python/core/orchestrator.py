@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 from nanoid import generate
 from pydantic import BaseModel
 
-from core.character import CharacterState
+from core.character import CharacterStore as CharacterState
 from core.notebook import CharacterNotebook
 from llm.client import LLMClient
 from schemas.protocol import SparkNotifyEvent, SparkCommandEvent
@@ -172,7 +172,7 @@ class CharacterOrchestrator:
 
             reaction = result.get("reaction")
             if reaction:
-                self.character.on_spark_notify_reaction_stream_end(event.id, reaction)
+                await self.character.on_spark_notify_reaction_stream_end(event.id, reaction)
                 if self.tts:
                     await self.tts.speak(reaction)
 

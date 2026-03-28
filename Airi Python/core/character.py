@@ -1,8 +1,11 @@
 import time
 import logging
+import asyncio
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from nanoid import generate
+
+from core.utils.llm_marker_parser import LLMMarkerParser
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +22,12 @@ class CharacterReaction(BaseModel):
 class StreamingReactionState(BaseModel):
     reaction: CharacterReaction
     intent: Any # Should be an IntentHandle equivalent
-    # parser: Any # LLMMarkerParser equivalent
+    parser: LLMMarkerParser
 
     class Config:
         arbitrary_types_allowed = True
 
-class CharacterState:
+class CharacterStore:
     """
     Manages the state and reactions of a character.
     Mimics packages/stage-ui/src/stores/character/index.ts.
@@ -41,7 +44,7 @@ class CharacterState:
     def owner_id(self) -> str:
         return self.name or "default"
 
-    def record_reaction(self, message: str, source_event_id: str = None, metadata: Dict[str, Any] = None) -> CharacterReaction:
+    def record_spark_notify_reaction(self, message: str, source_event_id: str = None, metadata: Dict[str, Any] = None) -> CharacterReaction:
         reaction = CharacterReaction(
             id=generate(),
             message=message,
@@ -68,12 +71,27 @@ class CharacterState:
             behavior='queue'
         )
 
-        # In a full implementation, we'd use a parser here to stream tokens
-        # For now, we write the full text.
-        if hasattr(intent, 'write_literal'):
-            intent.write_literal(text)
-        elif hasattr(intent, 'writeLiteral'):
-            intent.writeLiteral(text)
+        async def on_literal(literal: str):
+            if literal:
+                if hasattr(intent, 'write_literal'):
+                    intent.write_literal(literal)
+                elif hasattr(intent, 'writeLiteral'):
+                    intent.writeLiteral(literal)
+
+        async def on_special(special: str):
+            if special:
+                if hasattr(intent, 'write_special'):
+                    intent.write_special(special)
+                elif hasattr(intent, 'writeSpecial'):
+                    intent.writeSpecial(special)
+
+        parser = LLMMarkerParser(
+            on_literal=on_literal,
+            on_special=on_special
+        )
+
+        await parser.consume(text)
+        await parser.end()
 
         if hasattr(intent, 'write_flush'):
             intent.write_flush()
@@ -82,7 +100,7 @@ class CharacterState:
             intent.writeFlush()
             intent.end()
 
-    def on_spark_notify_reaction_stream_event(self, spark_event_id: str, chunk: str, metadata: Dict[str, Any] = None):
+    async def on_spark_notify_reaction_stream_event(self, spark_event_id: str, chunk: str, metadata: Dict[str, Any] = None):
         if spark_event_id not in self.streaming_reactions:
             new_reaction = CharacterReaction(
                 id=generate(),
@@ -101,29 +119,46 @@ class CharacterState:
                     behavior='interrupt'
                 )
 
+            async def on_literal(literal: str):
+                if literal and intent:
+                    if hasattr(intent, 'write_literal'):
+                        intent.write_literal(literal)
+                    elif hasattr(intent, 'writeLiteral'):
+                        intent.writeLiteral(literal)
+
+            async def on_special(special: str):
+                if special and intent:
+                    if hasattr(intent, 'write_special'):
+                        intent.write_special(special)
+                    elif hasattr(intent, 'writeSpecial'):
+                        intent.writeSpecial(special)
+
+            parser = LLMMarkerParser(
+                on_literal=on_literal,
+                on_special=on_special
+            )
+
             self.streaming_reactions[spark_event_id] = StreamingReactionState(
                 reaction=new_reaction,
-                intent=intent
+                intent=intent,
+                parser=parser
             )
 
         state = self.streaming_reactions[spark_event_id]
         state.reaction.message += chunk
+        await state.parser.consume(chunk)
 
-        if state.intent:
-            if hasattr(state.intent, 'write_literal'):
-                state.intent.write_literal(chunk)
-            elif hasattr(state.intent, 'writeLiteral'):
-                state.intent.writeLiteral(chunk)
-
-    def on_spark_notify_reaction_stream_end(self, spark_event_id: str, full_text: str, metadata: Dict[str, Any] = None):
+    async def on_spark_notify_reaction_stream_end(self, spark_event_id: str, full_text: str, metadata: Dict[str, Any] = None):
         state = self.streaming_reactions.get(spark_event_id)
         if not state:
             # Fallback if stream event wasn't received
-            self.record_reaction(message=full_text, source_event_id=spark_event_id, metadata=metadata)
+            self.record_spark_notify_reaction(message=full_text, source_event_id=spark_event_id, metadata=metadata)
             return
 
         state.reaction.message = full_text
-        self.record_reaction(message=full_text, source_event_id=spark_event_id, metadata=metadata)
+        self.record_spark_notify_reaction(message=full_text, source_event_id=spark_event_id, metadata=metadata)
+
+        await state.parser.end()
 
         if state.intent:
             if hasattr(state.intent, 'write_flush'):
