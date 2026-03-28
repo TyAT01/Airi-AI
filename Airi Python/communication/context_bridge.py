@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable, Awaitable
+from typing import List, Dict, Any, Optional, Callable, Awaitable, Union
 from nanoid import generate
 from pydantic import BaseModel
 
@@ -21,6 +21,12 @@ class ContextMessage(BaseModel):
     content: Any
     metadata: Dict[str, Any] = {}
     createdAt: float
+
+def normalize_context_snapshot(contexts: Dict[str, Any]) -> Dict[str, Any]:
+    # In Python, we don't have toRaw(), but we can ensure deep copies if needed
+    return {
+        "contexts": {key: [ctx for ctx in value] for key, value in contexts.items()}
+    }
 
 class ContextBridge:
     def __init__(
@@ -49,13 +55,16 @@ class ContextBridge:
         self.server.set_on_event_callback(self.handle_server_event)
 
         # Register hooks for chat orchestrator
-        # Porting JS hooks to Python hooks (assuming ChatOrchestratorStore has similar hook registration)
         self.chat_orchestrator.hooks.on_before_message_composed(self.on_before_message_composed)
         self.chat_orchestrator.hooks.on_after_message_composed(self.on_after_message_composed)
         self.chat_orchestrator.hooks.on_before_send(self.on_before_send)
         self.chat_orchestrator.hooks.on_after_send(self.on_after_send)
+        self.chat_orchestrator.hooks.on_token_literal(self.on_token_literal)
+        self.chat_orchestrator.hooks.on_token_special(self.on_token_special)
+        self.chat_orchestrator.hooks.on_stream_end(self.on_stream_end)
+        self.chat_orchestrator.hooks.on_assistant_response_end(self.on_assistant_response_end)
         self.chat_orchestrator.hooks.on_assistant_message(self.on_assistant_message)
-        # ... others
+        self.chat_orchestrator.hooks.on_chat_turn_complete(self.on_chat_turn_complete)
 
     async def handle_server_event(self, event: Dict[str, Any]):
         event_type = event.get("type")
@@ -68,8 +77,7 @@ class ContextBridge:
                 createdAt=time.time() * 1000
             )
             self.chat_context.ingest_context_message(context_message.dict())
-            # In Python, we might not need broadcast channel if it's one process,
-            # but we can notify other components if needed.
+            # Broadcast logic could go here if multi-process
 
         elif event_type == "input:text":
             await self.handle_input_text(event)
@@ -80,17 +88,19 @@ class ContextBridge:
         context_updates = data.get("contextUpdates", [])
 
         if context_updates:
+            created_at = time.time() * 1000
             for update in context_updates:
-                update["id"] = update.get("id", generate())
-                update["contextId"] = update.get("contextId", update["id"])
+                update_id = update.get("id", generate())
+                context_id = update.get("contextId", update_id)
                 self.chat_context.ingest_context_message({
                     **update,
+                    "id": update_id,
+                    "contextId": context_id,
                     "metadata": event.get("metadata", {}),
-                    "createdAt": time.time() * 1000
+                    "createdAt": created_at
                 })
 
         if self.consciousness.active_provider and self.consciousness.active_model:
-            # Simplified ingestion
             message_text = text
             overrides = data.get("overrides", {})
             if overrides.get("messagePrefix"):
@@ -98,7 +108,8 @@ class ContextBridge:
 
             target_session_id = overrides.get("sessionId")
 
-            # Simulate Lock or sequential execution
+            # Python doesn't have navigator.locks.request,
+            # but we can use an asyncio.Lock if needed for concurrency control within one process
             await self.chat_orchestrator.ingest(
                 message_text,
                 {
@@ -114,7 +125,35 @@ class ContextBridge:
     async def on_before_message_composed(self, message, context):
         if self.is_processing_remote_stream:
             return
-        # Broadcast logic if needed
+        # Broadcast logic if multi-process
+
+    async def on_after_message_composed(self, message, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_before_send(self, message, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_after_send(self, message, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_token_literal(self, literal, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_token_special(self, special, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_stream_end(self, context):
+        if self.is_processing_remote_stream:
+            return
+
+    async def on_assistant_response_end(self, message, context):
+        if self.is_processing_remote_stream:
+            return
 
     async def on_assistant_message(self, message, message_text, context):
         await self.server.broadcast({
@@ -131,6 +170,27 @@ class ContextBridge:
             }
         })
 
+    async def on_chat_turn_complete(self, chat, context):
+        await self.server.broadcast({
+            "type": "output:gen-ai:chat:complete",
+            "data": {
+                **context.get("input", {}).get("data", {}),
+                "message": chat.get("output"),
+                "toolCalls": [],
+                "usage": {
+                    "promptTokens": 0,
+                    "completionTokens": 0,
+                    "totalTokens": 0,
+                    "source": "estimate-based"
+                },
+                "gen-ai:chat": {
+                    "message": context.get("message"),
+                    "composedMessage": context.get("composedMessage"),
+                    "contexts": context.get("contexts"),
+                    "input": context.get("input")
+                }
+            }
+        })
+
     def dispose(self):
-        # Cleanup logic
         pass

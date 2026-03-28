@@ -1,8 +1,13 @@
-from typing import List, Optional, Dict, Any, Union, Literal
+import asyncio
+import time
+from typing import List, Optional, Dict, Any, Union, Literal, Generic, TypeVar
+
 from pydantic import BaseModel, Field
 from enum import Enum
-import time
 from nanoid import generate
+
+TType = TypeVar('TType', bound=str)
+TPayload = TypeVar('TPayload')
 
 class MessageHeartbeatKind(str, Enum):
     PING = "ping"
@@ -52,6 +57,30 @@ def create_event(
         tags=tags,
         payload=payload
     )
+
+class EventStream(Generic[TPayload]):
+    def __init__(self, queue: Optional[asyncio.Queue] = None):
+        self.queue = queue or asyncio.Queue()
+        self.closed = False
+
+    async def emit(self, event: TPayload):
+        if not self.closed:
+            await self.queue.put(event)
+
+    def close(self):
+        self.closed = True
+
+    async def __aiter__(self):
+        while not (self.closed and self.queue.empty()):
+            try:
+                event = await self.queue.get()
+                yield event
+                self.queue.task_done()
+            except asyncio.CancelledError:
+                break
+
+def create_event_stream() -> EventStream[TPayload]:
+    return EventStream()
 
 class EventBaseMetadata(BaseModel):
     source: Optional[ModuleIdentity] = None
