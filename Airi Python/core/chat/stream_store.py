@@ -37,7 +37,12 @@ class ChatStreamStore:
         session_messages = self.chat_session.get_session_messages(session_id)
 
         if self.streaming_message.slices:
-            session_messages.append(self.streaming_message.dict())
+            # Match TS logic: toRaw(streamingMessage.value)
+            session_messages.append(self.streaming_message.model_dump())
+
+        # In TS, it persists session messages after pushing
+        if hasattr(self.chat_session, 'persist_session_messages'):
+            self.chat_session.persist_session_messages(session_id)
 
         # Reset streaming message
         self.streaming_message = StreamingAssistantMessage()

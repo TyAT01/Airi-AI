@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from schemas.protocol import SparkNotifyEvent, SparkCommandEvent, SparkCommandGuidance, SparkCommandGuidanceOption
 from llm.client import LLMClient
-from core.character import CharacterState
+from core.character import CharacterStore as CharacterState
 
 logger = logging.getLogger(__name__)
 
