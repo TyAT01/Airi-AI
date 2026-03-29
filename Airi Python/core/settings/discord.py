@@ -5,12 +5,19 @@ from core.configurator import Configurator
 logger = logging.getLogger(__name__)
 
 class DiscordSettings:
+    """
+    Manages Discord integration settings.
+    Mirror of packages/stage-ui/src/stores/modules/discord.ts.
+    """
     def __init__(self, configurator: Configurator):
         self.configurator = configurator
         self.enabled: bool = False
         self.token: str = ""
 
     def save_settings(self):
+        """
+        Broadcasts configuration to backend.
+        """
         self.configurator.update_for("discord", {
             "token": self.token,
             "enabled": self.enabled,
